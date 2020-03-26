@@ -1,0 +1,12 @@
+# attestation files
+*.der
+*.pem
+
+# macOS cruft
+.DS_Store
+
+# rust build products
+target/
+
+# ceremony products
+ceremony-products/

@@ -1,0 +1,135 @@
+#!/usr/bin/env bash
+
+# verify-yubihsm2-attestations: Given a YubiHSM 2's serial number, collect the
+# generated attestations for that YubiHSM and verify them against the chain
+# of certificates.
+
+set -eo pipefail
+
+LOGFILE=./verify-yubihsm2-attestations.log
+YUBIHSM2_ATTEST_CERT=./assets/yubihsm2-attest-cert.pem
+YUBIHSM2_INTERMEDIATE_CERT=./assets/yubihsm2-intermediate-cert.pem
+
+function die {
+    >&2 echo "Fatal: ${*}"
+    exit 1
+}
+
+function info {
+    msg="[$(date +'%Y-%m-%dT%H:%M:%S%z')]: ${*}"
+    >&2 echo "${msg}"
+    echo "${msg}" >> "${LOGFILE}"
+}
+
+function record-checksums {
+    input="${1}"
+
+    info "Recording checksums for ${input}"
+    sha1=$(shasum -a 1 "${input}")
+    sha256=$(shasum -a 256 "${input}")
+
+    info "SHA1: ${sha1}"
+    info "SHA256: ${sha256}"
+}
+
+function convert-der-to-pem {
+    der_file="${1}"
+    pem_file=$(basename "${der_file}" .der).pem
+
+    openssl x509 -in "${der_file}" -inform DER -out "${pem_file}" -outform PEM
+
+    echo "${pem_file}"
+}
+
+serial_number="${1}"
+
+[[ -f "${YUBIHSM2_ATTEST_CERT}" ]] \
+    || die "Missing Yubico root attestation certificate to verify against?"
+[[ -f "${YUBIHSM2_INTERMEDIATE_CERT}" ]] \
+    || die "Missing Yubico intermediate certificate to verify against?"
+
+[[ -n "${serial_number}" ]] || die "Usage: verify-yubihsm2-attestations <serial-number>"
+
+hsm_attestation_cert_der="${serial_number}_cert.der"
+root_attestation_der="${serial_number}_root_attestation.der"
+targets_attestation_der="${serial_number}_targets_attestation.der"
+
+[[ -f "${hsm_attestation_cert_der}" ]] \
+    || die "Missing the HSM's attestation certificate: ${hsm_attestation_cert_der}"
+[[ -f "${root_attestation_der}" ]] \
+    || die "Missing the root key's attestation certificate: ${root_attestation_der}"
+[[ -f "${targets_attestation_der}" ]] \
+    || die "Missing the targets key's attestation certificate: ${targets_attestation_der}"
+
+info "Beginning verification of attestations for YubiHSM 2 ${serial_number}"
+
+info "Recording checksums for public keys"
+pubkey_files=("${serial_number}_root_pubkey.pub" "${serial_number}_targets_pubkey.pub")
+for pubkey_file in "${pubkey_files[@]}"; do
+    record-checksums "${pubkey_file}"
+done
+
+info "Recording checksums for initial DERs"
+der_files=("${hsm_attestation_cert_der}" "${root_attestation_der}" "${targets_attestation_der}")
+for der_file in "${der_files[@]}"; do
+    record-checksums "${der_file}"
+done
+
+info "Converting the attestation DERs into PEMs"
+pem_files=()
+for der_file in "${der_files[@]}"; do
+    pem_files+=("$(convert-der-to-pem "${der_file}")")
+done
+
+info "Recording checksums for converted attestation PEMs"
+for pem_file in "${pem_files[@]}"; do
+    record-checksums "${pem_file}"
+done
+
+info "Performing the actual verifications"
+
+info "First, verifying the Yubico intermediate against the Yubico root"
+output=$(openssl verify -CAfile "${YUBIHSM2_ATTEST_CERT}" "${YUBIHSM2_INTERMEDIATE_CERT}")
+info "${output}"
+
+info "Next, verifying the HSM intermediate cert against the bundled Yubico certs"
+hsm_attestation_cert_pem=$(basename "${hsm_attestation_cert_der}" .der).pem
+output=$( \
+    openssl verify \
+        -CAfile <(cat "${YUBIHSM2_INTERMEDIATE_CERT}" "${YUBIHSM2_ATTEST_CERT}") \
+        "${hsm_attestation_cert_pem}" \
+)
+info "${output}"
+
+info "Finally, verifying each of the attestations against the entire bundle"
+root_attestation_pem=$(basename "${root_attestation_der}" .der).pem
+output=$( \
+    openssl verify \
+        -CAfile <( \
+            cat "${hsm_attestation_cert_pem}" \
+                "${YUBIHSM2_INTERMEDIATE_CERT}" \
+                "${YUBIHSM2_ATTEST_CERT}" \
+            ) \
+        "${root_attestation_pem}" \
+)
+info "${output}"
+
+targets_attestation_pem=$(basename "${targets_attestation_der}" .der).pem
+output=$( \
+    openssl verify \
+        -CAfile <( \
+            cat "${hsm_attestation_cert_pem}" \
+                "${YUBIHSM2_INTERMEDIATE_CERT}" \
+                "${YUBIHSM2_ATTEST_CERT}" \
+            ) \
+        "${targets_attestation_pem}" \
+)
+info "${output}"
+
+info "Attested that the root and targets keys were generated on device ${serial_number}."
+info "Collecting all generation and attestation products for archiving."
+
+mkdir -p ceremony-products
+mv "${pubkey_files[@]}" ceremony-products
+mv "${der_files[@]}" "${pem_files[@]}" ceremony-products
+mv "${LOGFILE}" ceremony-products
