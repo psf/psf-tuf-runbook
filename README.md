@@ -78,7 +78,7 @@ needs to be reprovisioned due to compromise,
     ![A YubiHSM 2](./assets/yubihsm2.jpg)
 
     In this picture, the serial number is `7550054`. Note that in later steps the serial number will
-    be 0-padded to 12 digits, like `000007550054`.
+    be 0-padded to 10 digits, like `0007550054`.
 
 1. **DO** locate the `yubihsm-provision` binary in the runbook directory's `bin` subdirectory.
 
