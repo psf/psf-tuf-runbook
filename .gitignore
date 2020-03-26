@@ -7,6 +7,7 @@
 
 # rust build products
 target/
+bin/yubihsm-provision
 
 # ceremony products
 ceremony-products/
