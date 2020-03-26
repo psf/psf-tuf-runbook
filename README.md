@@ -206,7 +206,9 @@ unique.
     ```
     XXXXXXXXXX_cert.der
     XXXXXXXXXX_root_attestation.der
+    XXXXXXXXXX_root_pubkey.pub
     XXXXXXXXXX_targets_attestation.der
+    XXXXXXXXXX_targets_pubkey.pub
     ```
 
     Where `XXXXXXXXXX` is the 0-prefixed serial number.
