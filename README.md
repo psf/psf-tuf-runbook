@@ -73,6 +73,19 @@ needs to be reprovisioned due to compromise,
 
 ## Provisioning the YubiHSM 2
 
+1. **DO** determine your signing body ID. You were given this ID with your HSM.
+
+    Your signing body ID looks like "${HSM}-${Number}". For example:
+
+    * `YubiHSM2-1`
+    * `Nitrokey HSM-4`
+
+1. **DO** determine your key type, using your signing body ID and the attestation chart below:
+
+    ![The TUF key generation attestation model](./assets/tuf-keygen-attestation-model.jpg)
+
+    For example, if your signing body ID is `YubiHSM2-2`, then your key type is P-384.
+
 1. **DO** locate and write down the serial number printed on the YubiHSM 2. Refer to the picture below:
 
     ![A YubiHSM 2](./assets/yubihsm2.jpg)
@@ -80,14 +93,7 @@ needs to be reprovisioned due to compromise,
     In this picture, the serial number is `7550054`. Note that in later steps the serial number will
     be 0-padded to 10 digits, like `0007550054`.
 
-1. **DO** locate the `yubihsm-provision` binary in the runbook directory's `bin` subdirectory.
-
-    ```bash
-    $ ls bin/
-    yubihsm-provision
-    ```
-
-1. **DO** confirm the hash of the `yubihsm-provision` binary against the following checksums with
+1. **DO** confirm the hash of the `./bin/yubihsm-provision` binary against the following checksums with
 the following commands:
 
     * SHA1: **TODO**
@@ -109,10 +115,13 @@ offline computer.
 
 1. **DO** ensure that exactly 1 (one) YubiHSM 2 is inserted into the trusted offline computer.
 
-1. **DO** run the `yubihsm-provision` binary:
+1. **DO** run the `yubihsm-provision` binary, using your key type according to the following rules:
+
+    * **IF** your keytype is "P-256", **THEN** pass `--type p256`
+    * **IF** your keytype is "P-384", **THEN** pass `--type p384`
 
     ```bash
-    $ ./yubihsm-provision
+    $ ./yubihsm-provision --type KEYTYPE
     ```
 
 1. **DO** wait for this prompt:

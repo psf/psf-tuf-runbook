@@ -129,7 +129,8 @@ info "${output}"
 info "Attested that the root and targets keys were generated on device ${serial_number}."
 info "Collecting all generation and attestation products for archiving."
 
-mkdir -p ceremony-products
-mv "${pubkey_files[@]}" ceremony-products
-mv "${der_files[@]}" "${pem_files[@]}" ceremony-products
-mv "${LOGFILE}" ceremony-products
+ceremony_products_dir="${serial_number}_ceremony_products"
+mkdir -p "${ceremony_products_dir}"
+mv "${pubkey_files[@]}" "${ceremony_products_dir}"
+mv "${der_files[@]}" "${pem_files[@]}" "${ceremony_products_dir}"
+mv "${LOGFILE}" "${ceremony_products_dir}"

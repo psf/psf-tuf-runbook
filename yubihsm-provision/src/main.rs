@@ -1,19 +1,25 @@
+use clap::{App, Arg};
 use dialoguer::{Confirmation, PasswordInput};
-use yubihsm::asymmetric::Algorithm;
+use signatory::ecdsa::{
+    curve::{CompressedPointSize, UncompressedPointSize},
+    generic_array::{typenum::U1, ArrayLength},
+};
 use yubihsm::attestation::Certificate;
 use yubihsm::authentication::key::Key;
-use yubihsm::authentication::{Algorithm as AuthAlg, DEFAULT_AUTHENTICATION_KEY_ID};
+use yubihsm::authentication::{Algorithm, DEFAULT_AUTHENTICATION_KEY_ID};
 use yubihsm::capability::Capability;
 use yubihsm::client::Client;
 use yubihsm::connector::usb::{Devices, UsbTimeout};
 use yubihsm::connector::Connector;
 use yubihsm::domain::Domain;
-use yubihsm::ecdsa::curve::NistP384;
+use yubihsm::ecdsa::algorithm;
+use yubihsm::ecdsa::curve;
 use yubihsm::object::{Id, Label, Type};
 use yubihsm::{Credentials, UsbConfig};
 
 use std::fs::File;
 use std::io::Write;
+use std::ops::Add;
 use std::path::Path;
 use std::process;
 use std::{thread, time};
@@ -245,7 +251,7 @@ fn new_auth_key(usb_config: &UsbConfig) -> Result<Id, String> {
         // Ed25519 keys is figured out.
         Capability::SIGN_ECDSA,
         // The authentication key's algorithm. This is the only available option.
-        AuthAlg::YubicoAes,
+        Algorithm::YubicoAes,
         // The password-derived key used to protect this authentication key.
         // NOTE: The YubiHSM family uses PBKDF2 with a static salt for key
         // derivation, so a long, random password should be used.
@@ -274,46 +280,17 @@ fn new_auth_key(usb_config: &UsbConfig) -> Result<Id, String> {
     return Ok(key_id);
 }
 
-fn new_ed25519_keypair_with_attestation(
+fn new_ecc_keypair_with_attestation<C>(
     label_str: &str,
     key_id: Id,
     client: &Client,
-) -> Result<Certificate, String> {
-    let label = match Label::from_bytes(label_str.as_bytes()) {
-        Ok(label) => label,
-        Err(e) => return Err(format!("user error: key label invalid: {}; reprovision", e)),
-    };
-
-    if let Err(e) = client.generate_asymmetric_key(
-        key_id,
-        label,
-        Domain::DOM1,
-        Capability::SIGN_EDDSA,
-        Algorithm::Ed25519,
-    ) {
-        return Err(format!("failed to create keypair: {}; reprovision", e));
-    }
-
-    // NOTE: The None parameter here indicates that we're using the default
-    // attestation key (object ID 0) to generate our attestation certificate.
-    // The default attestation key is a natural choice, since it's signed
-    // by an intermediate CA which in turn is signed by the well-known,
-    // public Yubico CA. Yubico publishes the intermediate's public cert here:
-    // https://developers.yubico.com/YubiHSM2/Concepts/E45DA5F361B091B30D8F2C6FA040DB6FEF57918E.pem
-    match client.sign_attestation_certificate(key_id, None) {
-        Ok(cert) => Ok(cert),
-        Err(e) => Err(format!(
-            "failed to create attestation certificate for {} ({}): {}; reprovision",
-            label_str, key_id, e
-        )),
-    }
-}
-
-fn new_ecp384_keypair_with_attestation(
-    label_str: &str,
-    key_id: Id,
-    client: &Client,
-) -> Result<(Vec<u8>, Certificate), String> {
+) -> Result<(Vec<u8>, Certificate), String>
+where
+    C: curve::Curve + algorithm::CurveAlgorithm,
+    <C::ScalarSize as Add>::Output: Add<U1> + ArrayLength<u8>,
+    CompressedPointSize<C::ScalarSize>: ArrayLength<u8>,
+    UncompressedPointSize<C::ScalarSize>: ArrayLength<u8>,
+{
     let label = match Label::from_bytes(label_str.as_bytes()) {
         Ok(label) => label,
         Err(e) => return Err(format!("user error: key label invalid: {}; reprovision", e)),
@@ -324,7 +301,7 @@ fn new_ecp384_keypair_with_attestation(
         label,
         Domain::DOM1,
         Capability::SIGN_ECDSA,
-        Algorithm::EcP384,
+        C::asymmetric_algorithm(),
     ) {
         return Err(format!("failed to create keypair: {}; reprovision", e));
     }
@@ -343,8 +320,8 @@ fn new_ecp384_keypair_with_attestation(
     // that it isn't in a format that most libraries can consume.
     // We ask it nicely to convert itself into a common format.
     // The unwrap here is safe, since
-    // NistP384::asymmetric_algorithm() == pubkey.algorithm.
-    let pubkey = pubkey.ecdsa::<NistP384>().unwrap().as_bytes().to_vec();
+    // C::asymmetric_algorithm() == pubkey.algorithm.
+    let pubkey = pubkey.ecdsa::<C>().unwrap().as_bytes().to_vec();
 
     // NOTE: The None parameter here indicates that we're using the default
     // attestation key (object ID 0) to generate our attestation certificate.
@@ -366,6 +343,22 @@ fn new_ecp384_keypair_with_attestation(
 }
 
 fn run() -> Result<(), String> {
+    let matches = App::new(env!("CARGO_PKG_NAME"))
+        .version(env!("CARGO_PKG_VERSION"))
+        .about(env!("CARGO_PKG_DESCRIPTION"))
+        .arg(
+            Arg::with_name("type")
+                .help("sets the ecc key type")
+                .short("t")
+                .long("type")
+                .multiple(false)
+                .takes_value(true)
+                .possible_values(&["p256", "p384"])
+                .required(true),
+        )
+        .get_matches();
+    let key_type = matches.value_of("type").unwrap();
+
     big_scary_banner()?;
 
     // Step 0: Find the attached YubiHSM and return a suitable USB config
@@ -412,15 +405,46 @@ fn run() -> Result<(), String> {
         Err(e) => return Err(format!("couldn't get the HSM's attestation cert: {}", e)),
     };
 
-    // let root_key_attestation =
-    //     new_ed25519_keypair_with_attestation("tuf-root", TUF_ROOT_KEY_ID, &client)?;
-    // let targets_key_attestation =
-    //     new_ed25519_keypair_with_attestation("tuf-targets", TUF_TARGETS_KEY_ID, &client)?;
+    // NOTE: There's probably a cleaner way to do this, but propagating a type parameter
+    // parametrically is currently outside of my Rust skill level. Instead, we manually
+    // match below and pass the correct type parameter in.
+    let ((root_pubkey, root_attestation), (targets_pubkey, targets_attestation)) = match key_type {
+        "p256" => (
+            new_ecc_keypair_with_attestation::<curve::NistP256>(
+                "tuf-root",
+                TUF_ROOT_KEY_ID,
+                &client,
+            )?,
+            new_ecc_keypair_with_attestation::<curve::NistP256>(
+                "tuf-targets",
+                TUF_TARGETS_KEY_ID,
+                &client,
+            )?,
+        ),
+        "p384" => (
+            new_ecc_keypair_with_attestation::<curve::NistP384>(
+                "tuf-root",
+                TUF_ROOT_KEY_ID,
+                &client,
+            )?,
+            new_ecc_keypair_with_attestation::<curve::NistP384>(
+                "tuf-targets",
+                TUF_TARGETS_KEY_ID,
+                &client,
+            )?,
+        ),
+        // NOTE: This panic is impossible due to the flag restrictions
+        // in possible_values.
+        _ => panic!("impossible match"),
+    };
 
-    let (root_pubkey, root_attestation) =
-        new_ecp384_keypair_with_attestation("tuf-root", TUF_ROOT_KEY_ID, &client)?;
-    let (targets_pubkey, targets_attestation) =
-        new_ecp384_keypair_with_attestation("tuf-targets", TUF_TARGETS_KEY_ID, &client)?;
+    // let (root_pubkey, root_attestation) =
+    //     new_ecc_keypair_with_attestation::<curve::NistP384>("tuf-root", TUF_ROOT_KEY_ID, &client)?;
+    // let (targets_pubkey, targets_attestation) = new_ecc_keypair_with_attestation::<curve::NistP384>(
+    //     "tuf-targets",
+    //     TUF_TARGETS_KEY_ID,
+    //     &client,
+    // )?;
 
     // Write our public keys and attestation data to disk.
     for tup in vec![
