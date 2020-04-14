@@ -53,15 +53,27 @@ $ git clone https://github.com/trailofbits/psf-tuf-runbook
 
 ## Determining the HSM
 
+1. **DO** determine your signing body ID. You were given this ID with your HSM.
+
+    Your signing body ID looks like "${Model}-${Number}". For example:
+
+    * `YubiHSM2-1`
+    * `Nitrokey HSM-4`
+
+1. **DO** determine your key type, using your signing body ID and the attestation chart below:
+
+    ![The TUF key generation attestation model](./assets/tuf-keygen-attestation-model.jpg)
+
+    For example, if your signing body ID is `YubiHSM2-2`, then your key type is P-384.
+
 1. **IF** you have a YubiHSM 2 that either has *not* been provisioned in a previous ceremony *or*
-needs to be reprovisioned due to compromise,
-**THEN GO TO** [Provisioning the YubiHSM 2](#provisioning-the-yubihsm-2).
+needs to be reprovisioned, **THEN GO TO** [Provisioning the YubiHSM 2](#provisioning-the-yubihsm-2).
 
 1. **IF** you have a YubiHSM 2 that has already been provisioned in a previous ceremony,
 **THEN GO TO** [Signing with the YubiHSM 2](#signing-with-the-yubihsm-2).
 
 1. **IF** you have a Nitrokey HSM that either has *not* been provisioned in a previous ceremony *or*
-needs to be reprovisioned due to compromise,
+needs to be reprovisioned,
 **THEN GO TO** [Provisioning the Nitrokey HSM](#provisioning-the-nitrokey-hsm).
 
 1. **IF** you have a Nitrokey HSM that has already been provisioned in a previous ceremony,
@@ -72,19 +84,6 @@ needs to be reprovisioned due to compromise,
 1. **END**
 
 ## Provisioning the YubiHSM 2
-
-1. **DO** determine your signing body ID. You were given this ID with your HSM.
-
-    Your signing body ID looks like "${HSM}-${Number}". For example:
-
-    * `YubiHSM2-1`
-    * `Nitrokey HSM-4`
-
-1. **DO** determine your key type, using your signing body ID and the attestation chart below:
-
-    ![The TUF key generation attestation model](./assets/tuf-keygen-attestation-model.jpg)
-
-    For example, if your signing body ID is `YubiHSM2-2`, then your key type is P-384.
 
 1. **DO** locate and write down the serial number printed on the YubiHSM 2. Refer to the picture below:
 
@@ -115,13 +114,13 @@ offline computer.
 
 1. **DO** ensure that exactly 1 (one) YubiHSM 2 is inserted into the trusted offline computer.
 
-1. **DO** run the `yubihsm-provision` binary, using your key type according to the following rules:
+1. **DO** run the `./bin/yubihsm-provision` binary, using your key type according to the following rules:
 
     * **IF** your keytype is "P-256", **THEN** pass `--type p256`
     * **IF** your keytype is "P-384", **THEN** pass `--type p384`
 
     ```bash
-    $ ./yubihsm-provision --type KEYTYPE
+    $ ./bin/yubihsm-provision --type KEYTYPE
     ```
 
 1. **DO** wait for this prompt:
@@ -221,3 +220,44 @@ unique.
     ```
 
     Where `XXXXXXXXXX` is the 0-prefixed serial number.
+
+## Provisioning the Nitrokey HSM
+
+1. **DO** determine the Security Officer PIN ("SO-PIN"):
+
+    1. **IF** the Nitrokey has not been provisioned before, **THEN** the SO-PIN is `3537363231383830`.
+
+    1. **IF** the Nitrokey has been previously provisioned, **THEN** the SO-PIN should have been retained from the previous provisoning.
+
+1. **DO** insert the Nitrokey HSM into the trusted offline computer.
+
+1. **DO** ensure that exactly one (1) Nitrokey HSM is inserted into the trusted offline computer.
+
+1. **DO** run the `./bin/nitrohsm-provision` script, using your SO-PIN and key type according to the following rules:
+
+    * **IF** your keytype is "P-256", **THEN** pass `--type p256`
+    * **IF** your keytype is "P-384", **THEN** pass `--type p384`
+
+    ```bash
+    $ ./bin/nitrohsm-provision --so-pin SO-PIN --type KEYTYPE
+    ```
+
+1. **DO** wait for this prompt:
+
+    ```
+    !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+    !!!                    DANGER!                    !!!
+    !!!                                               !!!
+    !!!   This program will reset and reprovision     !!!
+    !!!   your Nitrokey HSM for TUF purposes.         !!!
+    !!!                                               !!!
+    !!!   Make sure to read the runbook before        !!!
+    !!!   using this program. Failure to do so        !!!
+    !!!   will cause PERMANENT key loss.              !!!
+    !!!                                               !!!
+    !!!   Hit "y" (case insensitive) to continue.     !!!
+    !!!                                               !!!
+    !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+    ```
+
+1. **DO** hit `y` once ready to continue.

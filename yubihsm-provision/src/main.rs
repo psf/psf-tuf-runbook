@@ -194,7 +194,7 @@ fn new_auth_key(usb_config: &UsbConfig) -> Result<Id, String> {
     };
 
     let confirm_password = match PasswordInput::new()
-        .with_prompt("Authentication key password")
+        .with_prompt("Confirm your authentication key password")
         .interact()
     {
         Ok(password) => password,
