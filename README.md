@@ -171,26 +171,25 @@ offline computer.
 
 1. **DO** hit `y` once ready to continue.
 
-
 1. **DO** wait for the following output and prompt:
 
-```
-Success! Giving the HSM 10 seconds to come back online...
+    ```
+    Success! Giving the HSM 10 seconds to come back online...
 
-#####################################################
-###                                               ###
-###   We're going to create a new "auth key"      ###
-###   on your YubiHSM.                            ###
-###                                               ###
-###   This "auth key" will                        ###
-###   have a password that you MUST remember      ###
-###   OR store securely and will protect the      ###
-###   TUF keys that are going to be created.      ###
-###                                               ###
-###   Hit "y" (case insensitive) to continue.     ###
-###                                               ###
-#####################################################
-```
+    #####################################################
+    ###                                               ###
+    ###   We're going to create a new "auth key"      ###
+    ###   on your YubiHSM.                            ###
+    ###                                               ###
+    ###   This "auth key" will                        ###
+    ###   have a password that you MUST remember      ###
+    ###   OR store securely and will protect the      ###
+    ###   TUF keys that are going to be created.      ###
+    ###                                               ###
+    ###   Hit "y" (case insensitive) to continue.     ###
+    ###                                               ###
+    #####################################################
+    ```
 
 1. **DO** hit `y` once ready to continue.
 
@@ -263,3 +262,35 @@ unique.
     ```
 
 1. **DO** hit `y` once ready to continue.
+
+1. **DO** wait for the following output and prompt:
+
+    ```
+    Successfully discovered a Nitrokey HSM with Slot #0
+    Continue with factory reset? This step is IRREVERSIBLE! [y/N]
+    ```
+
+1. **DO** hit `y` once ready to continue.
+
+1. **DO** wait for the following output and prompt:
+
+    ```
+    Success! Reinitialized the HSM.
+    This is your NEW Security Officer PIN: XXXXXXXXXXXXXXXX
+    You MUST write this SO PIN down before continuing.
+    Re-enter your NEW Security Officer PIN:
+    ```
+
+1. **DO** write down and re-enter the *new* Security Officer PIN.
+
+1. **DO** wait for the following output and prompt:
+
+    ```
+    This is your NEW user PIN: XXXXXX
+    You MUST write this user PIN down before continuing.
+    Re-enter your NEW user PIN:
+    ```
+
+1. **DO** write down and re-enter the *new* user PIN.
+
+<!-- TODO: key generation -->
