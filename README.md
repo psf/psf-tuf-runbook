@@ -224,7 +224,7 @@ unique.
 
 ## Provisioning the Nitrokey HSM
 
-1. **DO** determine the Security Officer PIN ("SO-PIN"):
+1. **DO** determine the current Security Officer PIN ("SO-PIN"):
 
     1. **IF** the Nitrokey has not been provisioned before, **THEN** the SO-PIN is `3537363231383830`.
 
@@ -254,7 +254,8 @@ unique.
     !!!                                               !!!
     !!!   Make sure to read the runbook before        !!!
     !!!   using this program. Failure to do so        !!!
-    !!!   will cause PERMANENT key loss.              !!!
+    !!!   will cause PERMANENT key loss and MAY       !!!
+    !!!   leave your HSM in an unusable state.        !!!
     !!!                                               !!!
     !!!   Hit "y" (case insensitive) to continue.     !!!
     !!!                                               !!!
