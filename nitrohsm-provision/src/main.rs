@@ -437,7 +437,7 @@ fn run() -> Result<(), String> {
         )
         .arg(
             Arg::with_name("so-pin")
-                .help("sets the initial Security Officer PIN")
+                .help("the current Security Officer PIN")
                 .short("p")
                 .long("so-pin")
                 .multiple(false)
