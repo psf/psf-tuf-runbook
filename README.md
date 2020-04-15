@@ -14,7 +14,7 @@ We use the following notation:
 * **DO** *actions*: Perform the following actions.
 * **IF** *condition* **THEN** *actions*: If *condition* is met, then perform the following *actions*.
 * **GO TO** *heading*: Go to the referenced heading in the runbook and perform the stated actions
-thereon. Do **not** return to the previous section unless told to.
+thereon. Do **not** return to the previous section unless indicated.
 * **END**: You've reached an end state.
 
 1. **DO GO TO** [Start](#start)
@@ -34,6 +34,7 @@ thereon. Do **not** return to the previous section unless told to.
     * New tamper-evident bags for storing the HSM and flash storage
     * A permanent marker pen
     * A pair of scissors
+    * Your signing body ID card
 
 1. **IF** you have a phone or other personal devices, **THEN** set them on airplane mode.
 
@@ -53,7 +54,8 @@ $ git clone https://github.com/trailofbits/psf-tuf-runbook
 
 ## Determining the HSM
 
-1. **DO** determine your signing body ID. You were given this ID with your HSM.
+1. **DO** determine your signing body ID. Your signing body ID should be written on a label
+on the tamper-evident bag that contains the HSM.
 
     Your signing body ID looks like "${Model}-${Number}". For example:
 
