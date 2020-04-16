@@ -5,6 +5,8 @@ use pkcs11::{types, Ctx};
 use rand::Rng;
 use regex::Regex;
 
+use std::fs::File;
+use std::io::Write;
 use std::path::Path;
 use std::process;
 
@@ -13,6 +15,14 @@ type PubkeyAttrs = [types::CK_ATTRIBUTE; 9];
 type PrivkeyAttrs = [types::CK_ATTRIBUTE; 10];
 
 type EccParams = (types::CK_MECHANISM, PubkeyAttrs, PrivkeyAttrs);
+
+// The suffix for the file that we'll write the root keypair's public key to.
+// This will have the same ultimate path format as the internal attestation path.
+const TUF_ROOT_KEY_PUBKEY_FILE_SUFFIX: &'static str = "root_pubkey.pub";
+
+// The suffix for the file that we'll write the targets keypair's public key to.
+// This will have the same ultimate path format as the internal attestation path.
+const TUF_TARGETS_KEY_PUBKEY_FILE_SUFFIX: &'static str = "targets_pubkey.pub";
 
 const OPENSC_PKCS11_SO: &'static str = "/usr/local/lib/opensc-pkcs11.so";
 
@@ -74,7 +84,7 @@ fn is_valid_so_pin(val: String) -> Result<(), String> {
     }
 }
 
-fn find_hsm() -> Result<(Ctx, types::CK_SLOT_ID), String> {
+fn find_hsm() -> Result<(Ctx, types::CK_SLOT_ID, String), String> {
     let pkcs11_so_path = Path::new(OPENSC_PKCS11_SO);
     if !pkcs11_so_path.exists() {
         return Err(format!(
@@ -115,10 +125,10 @@ fn find_hsm() -> Result<(Ctx, types::CK_SLOT_ID), String> {
         }
     };
 
-    // Finally, sanity-check the token that's backing our single slot.
+    // Sanity-check the token that's backing our single slot.
     // Don't allow a non-Nitrokey HSM to progress beyond this point.
-    let slot_info = match ctx.get_slot_info(slot) {
-        Ok(slot_info) => slot_info,
+    let manufacturer_id = match ctx.get_slot_info(slot) {
+        Ok(slot_info) => String::from(slot_info.manufacturerID),
         Err(e) => {
             return Err(format!(
                 "unable to get token info for slot #{}: {}",
@@ -127,14 +137,25 @@ fn find_hsm() -> Result<(Ctx, types::CK_SLOT_ID), String> {
         }
     };
 
-    let manufacturer_id = String::from(slot_info.manufacturerID);
     if manufacturer_id != "Nitrokey" {
         return Err(format!("unknown HSM: {}", manufacturer_id));
     }
 
+    // Finally, grab our Nitrokey HSM's serial number, so that we can write
+    // unique files to disk.
+    let serial_number = match ctx.get_token_info(slot) {
+        Ok(token) => String::from(token.serialNumber),
+        Err(e) => {
+            return Err(format!(
+                "couldn't get info for token with slot #{}: {}",
+                slot, e
+            ))
+        }
+    };
+
     println!("Successfully discovered a Nitrokey HSM with Slot #{}", slot);
 
-    Ok((ctx, slot))
+    Ok((ctx, slot, serial_number))
 }
 
 fn token_in_deadly_state(token: &types::CK_TOKEN_INFO) -> bool {
@@ -388,7 +409,7 @@ fn new_ecc_keypair(
     slot: types::CK_SLOT_ID,
     user_pin: &str,
     ecc_params: &EccParams,
-) -> Result<(), String> {
+) -> Result<Vec<types::CK_BYTE>, String> {
     let (mechanism, pubkey_template, privkey_template) = ecc_params;
 
     let session = match pkcs11_ctx.open_session(
@@ -418,7 +439,28 @@ fn new_ecc_keypair(
         return Err(format!("Failed to close session: {}", e));
     }
 
-    unimplemented!();
+    // Using the handle for the newly created public key, grab the CKA_EC_POINT
+    // (i.e., the public key).
+    // The PKCS#11 API is a little clumsy here: we call get_attribute_value once
+    // to retrieve the required size, then call it again with that space allocated
+    // to get the actual value.
+    let mut ec_point_template = vec![types::CK_ATTRIBUTE::new(types::CKA_EC_POINT)];
+    let ec_point_buf =
+        match pkcs11_ctx.get_attribute_value(session, pubkey_handle, &mut ec_point_template) {
+            Ok((_, _)) => {
+                Vec::<types::CK_BYTE>::with_capacity(ec_point_template[0].ulValueLen as usize)
+            }
+            Err(e) => return Err(format!("failed to get CKA_EC_POINT for pubkey: {}", e)),
+        };
+    ec_point_template[0].set_bytes(&ec_point_buf.as_slice());
+
+    match pkcs11_ctx.get_attribute_value(session, pubkey_handle, &mut ec_point_template) {
+        Ok((types::CKR_OK, _)) => {}
+        Ok((e, _)) => return Err(format!("failed to populate CKA_EC_POINT buffer: {}", e)),
+        Err(e) => return Err(format!("failed to get CKA_EC_POINT: {}", e)),
+    };
+
+    Ok(ec_point_buf)
 }
 
 fn run() -> Result<(), String> {
@@ -452,7 +494,7 @@ fn run() -> Result<(), String> {
 
     big_scary_banner()?;
 
-    let (pkcs11_ctx, slot) = find_hsm()?;
+    let (pkcs11_ctx, slot, serial_number) = find_hsm()?;
 
     // TODO: Create an HSM session here, instead of passing the context and slot
     // around all over the place.
@@ -472,6 +514,26 @@ fn run() -> Result<(), String> {
 
     let root_pubkey = new_ecc_keypair(&pkcs11_ctx, slot, &user_pin, &root_params)?;
     let targets_pubkey = new_ecc_keypair(&pkcs11_ctx, slot, &user_pin, &targets_params)?;
+
+    for tup in vec![
+        (TUF_ROOT_KEY_PUBKEY_FILE_SUFFIX, root_pubkey),
+        (TUF_TARGETS_KEY_PUBKEY_FILE_SUFFIX, targets_pubkey),
+    ] {
+        let path = format!("{}_{}", serial_number, tup.0);
+        let mut file = match File::create(Path::new(&path)) {
+            Ok(file) => file,
+            Err(e) => {
+                return Err(format!(
+                    "attestation file creation failed: {}: {}",
+                    tup.0, e
+                ))
+            }
+        };
+
+        if let Err(e) = file.write_all(&tup.1) {
+            return Err(format!("attestation file I/O failed: {}: {}", tup.0, e));
+        }
+    }
 
     Ok(())
 }
