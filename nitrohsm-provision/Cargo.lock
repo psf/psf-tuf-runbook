@@ -206,7 +206,8 @@ dependencies = [
 [[package]]
 name = "pkcs11"
 version = "0.5.0"
-source = "git+https://github.com/mheese/rust-pkcs11?rev=fce73ce7a6ab9ecb9f314a922a99c0bb936daf08#fce73ce7a6ab9ecb9f314a922a99c0bb936daf08"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "3aca6d67e4c8613bfe455599d0233d00735f85df2001f6bfd9bb7ac0496b10af"
 dependencies = [
  "libloading",
  "num-bigint",

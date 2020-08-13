@@ -358,7 +358,7 @@ fn get_ecc_keypair_params(key_type: &str, label: &str) -> Result<EccParams, Stri
         // http://docs.oasis-open.org/pkcs11/pkcs11-curr/v2.40/cs01/pkcs11-curr-v2.40-cs01.html#_Toc399398881
         types::CK_ATTRIBUTE::new(types::CKA_EC_PARAMS).with_bytes(key_type_oid),
         // The keypair's label.
-        types::CK_ATTRIBUTE::new(types::CKA_LABEL).with_string(label),
+        types::CK_ATTRIBUTE::new(types::CKA_LABEL).with_string(format!("{}-pub", label).as_str()),
         // The keypair's "type". This is really the general class of keytype, in this case CKA_EC.
         types::CK_ATTRIBUTE::new(types::CKA_KEY_TYPE).with_ck_ulong(&ec_key_type),
         // Our public key supports verification where the signature is an appendix to the data.
@@ -378,7 +378,7 @@ fn get_ecc_keypair_params(key_type: &str, label: &str) -> Result<EccParams, Stri
 
     let privkey_template: PrivkeyAttrs = [
         // Like above; the keypair's label.
-        types::CK_ATTRIBUTE::new(types::CKA_LABEL).with_string(&label),
+        types::CK_ATTRIBUTE::new(types::CKA_LABEL).with_string(format!("{}-priv", label).as_str()),
         // Like above; the keypair's "type".
         types::CK_ATTRIBUTE::new(types::CKA_KEY_TYPE).with_ck_ulong(&ec_key_type),
         // Our private key supports signatures where the signature is an appendix to the data.
@@ -432,12 +432,13 @@ fn new_ecc_keypair(
     let (pubkey_handle, privkey_handle) =
         match pkcs11_ctx.generate_key_pair(session, mechanism, pubkey_template, privkey_template) {
             Ok((pubkey_handle, privkey_handle)) => (pubkey_handle, privkey_handle),
-            Err(e) => return Err(format!("failed to generate keypair: {}", e)),
+            Err(e) => {
+                pkcs11_ctx
+                    .close_session(session)
+                    .unwrap_or_else(|e| eprintln!("Error while closing session: {}", e));
+                return Err(format!("failed to generate keypair: {}", e));
+            }
         };
-
-    if let Err(e) = pkcs11_ctx.close_session(session) {
-        return Err(format!("Failed to close session: {}", e));
-    }
 
     // Using the handle for the newly created public key, grab the CKA_EC_POINT
     // (i.e., the public key).
@@ -447,18 +448,37 @@ fn new_ecc_keypair(
     let mut ec_point_template = vec![types::CK_ATTRIBUTE::new(types::CKA_EC_POINT)];
     let ec_point_buf =
         match pkcs11_ctx.get_attribute_value(session, pubkey_handle, &mut ec_point_template) {
+            Ok((types::CKR_ATTRIBUTE_TYPE_INVALID, _)) | Err(_) => {
+                pkcs11_ctx
+                    .close_session(session)
+                    .unwrap_or_else(|e| eprintln!("Error while closing session: {}", e));
+                return Err(format!("failed to get CKA_EC_POINT length for pubkey"));
+            }
             Ok((_, _)) => {
                 Vec::<types::CK_BYTE>::with_capacity(ec_point_template[0].ulValueLen as usize)
             }
-            Err(e) => return Err(format!("failed to get CKA_EC_POINT for pubkey: {}", e)),
         };
     ec_point_template[0].set_bytes(&ec_point_buf.as_slice());
 
     match pkcs11_ctx.get_attribute_value(session, pubkey_handle, &mut ec_point_template) {
         Ok((types::CKR_OK, _)) => {}
-        Ok((e, _)) => return Err(format!("failed to populate CKA_EC_POINT buffer: {}", e)),
-        Err(e) => return Err(format!("failed to get CKA_EC_POINT: {}", e)),
+        Ok((e, _)) => {
+            pkcs11_ctx
+                .close_session(session)
+                .unwrap_or_else(|e| eprintln!("Error while closing session: {}", e));
+            return Err(format!("failed to populate CKA_EC_POINT buffer: {}", e));
+        }
+        Err(e) => {
+            pkcs11_ctx
+                .close_session(session)
+                .unwrap_or_else(|e| eprintln!("Error while closing session: {}", e));
+            return Err(format!("failed to get CKA_EC_POINT: {}", e));
+        }
     };
+
+    if let Err(e) = pkcs11_ctx.close_session(session) {
+        return Err(format!("Failed to close session: {}", e));
+    }
 
     Ok(ec_point_buf)
 }
