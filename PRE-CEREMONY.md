@@ -9,7 +9,9 @@ before the key signing and generation ceremonies may be attempted.
 Confirm the presence of **each** of the following:
 
 * **Exactly one (1)** preparation computer
-  * The preparation steps below assume that the computer is running macOS.
+  * The preparation steps below assume that the computer is running macOS
+* **Exactly one (1)** communication computer
+  * This *MAY* be the same as the preparation computer
 * **Exactly one (1)** external monitor, HDMI compatible
 * **Exactly one (1)** HDMI cable
 * **Exactly one (1)** USB keyboard
@@ -109,3 +111,11 @@ $ sudo shutdown
 ```
 
 * Store the Raspberry Pi and attached microSD card in a tamper-evident bag.
+
+### Test the ceremony communication computer
+
+* Ensure that the communication computer's camera is functional.
+
+* Ensure that the communication computer has internet access.
+
+* Ensure that the communication computer's browser is up-to-date.
