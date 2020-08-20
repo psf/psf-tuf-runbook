@@ -10,9 +10,9 @@ use std::io::Write;
 use std::path::Path;
 use std::process;
 
-type PubkeyAttrs = [types::CK_ATTRIBUTE; 9];
+type PubkeyAttrs = [types::CK_ATTRIBUTE; 10];
 
-type PrivkeyAttrs = [types::CK_ATTRIBUTE; 10];
+type PrivkeyAttrs = [types::CK_ATTRIBUTE; 11];
 
 type EccParams = (types::CK_MECHANISM, PubkeyAttrs, PrivkeyAttrs);
 
@@ -342,6 +342,8 @@ fn get_ecc_keypair_params(key_type: &str, label: &str) -> Result<EccParams, Stri
         ulParameterLen: 0,
     };
 
+    let public_key_class = types::CKO_PUBLIC_KEY;
+    let private_key_class = types::CKO_PRIVATE_KEY;
     let ec_key_type = types::CKK_EC;
     let b_true = types::CK_TRUE;
     let b_false = types::CK_FALSE;
@@ -349,14 +351,16 @@ fn get_ecc_keypair_params(key_type: &str, label: &str) -> Result<EccParams, Stri
     let key_type_oid = match key_type {
         "p256" => P256_OID,
         "p384" => P384_OID,
-        _ => panic!("impossible match"),
+        _ => unreachable!(),
     };
 
     let pubkey_template: PubkeyAttrs = [
+        // This is a public key.
+        types::CK_ATTRIBUTE::new(types::CKA_CLASS).with_ck_ulong(&public_key_class),
         // PKCS#11 v2.40-CS01 S 2.3.5: We specify the CKA_EC_PARAMS for the entire
         // keypair using an attribute on the public key.
         // http://docs.oasis-open.org/pkcs11/pkcs11-curr/v2.40/cs01/pkcs11-curr-v2.40-cs01.html#_Toc399398881
-        types::CK_ATTRIBUTE::new(types::CKA_EC_PARAMS).with_bytes(key_type_oid),
+        types::CK_ATTRIBUTE::new(types::CKA_EC_PARAMS).with_bytes(&key_type_oid),
         // The keypair's label.
         types::CK_ATTRIBUTE::new(types::CKA_LABEL).with_string(format!("{}-pub", label).as_str()),
         // The keypair's "type". This is really the general class of keytype, in this case CKA_EC.
@@ -377,6 +381,8 @@ fn get_ecc_keypair_params(key_type: &str, label: &str) -> Result<EccParams, Stri
     ];
 
     let privkey_template: PrivkeyAttrs = [
+        // This is a private key.
+        types::CK_ATTRIBUTE::new(types::CKA_CLASS).with_ck_ulong(&private_key_class),
         // Like above; the keypair's label.
         types::CK_ATTRIBUTE::new(types::CKA_LABEL).with_string(format!("{}-priv", label).as_str()),
         // Like above; the keypair's "type".
