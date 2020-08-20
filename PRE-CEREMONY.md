@@ -72,7 +72,7 @@ $ diskutil unmountDisk /dev/rdiskN
 * Copy the ceremony image onto the block device.
 
 ```bash
-sudo dd bs=1M if=ceremony.iso of=/dev/rdiskN
+sudo dd bs=1m if=ceremony.iso of=/dev/rdiskN
 ```
 
 where `/dev/rdiskN` is the "raw" block device identified above.
@@ -81,7 +81,7 @@ where `/dev/rdiskN` is the "raw" block device identified above.
 
 ```bash
 $ sync
-$ sudo diskutil eject /dev/rdiskN
+$ diskutil eject /dev/rdiskN
 ```
 
 * Insert the microSD card into the Raspberry Pi.
@@ -100,8 +100,11 @@ Password: `raspberry`
 
 ```bash
 $ which pkcs11-tool
+/usr/bin/pkcs11-tool
 $ which yubihsm-provision
+/home/pi/bin/yubihsm-provision
 $ which nitrohsm-provision
+/home/pi/bin/nitrohsm-provision
 ```
 
 * Power the Raspberry Pi off and disconnect all peripherals **except** for the microSD card.
