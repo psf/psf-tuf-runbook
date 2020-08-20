@@ -26,7 +26,7 @@ Confirm the presence of **each** of the following:
 
 ## Preparation
 
-### Inspect the tamper-evident bags and markets
+### Inspect the tamper-evident bags and markers
 
 * Ensure that the tamper-evident bags are intact.
 
