@@ -27,7 +27,7 @@ thereon. Do **not** return to the previous section unless indicated.
 
 1. **DO** have the following equipment ready:
 
-    * The trusted offline computer
+    * The trusted offline computer, in tamper-evident packaging
     * A camera or phone capable of taking pictures
     * A USB drive or other removable flash storage labeled "PUBLIC" and formatted as FAT32
     * The HSM being provisioned, in tamper-evident packaging
