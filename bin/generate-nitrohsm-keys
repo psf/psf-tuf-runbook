@@ -1,0 +1,135 @@
+#!/usr/bin/env python3
+
+# generate-nitrohsm-keys: Given a NitroHSM provisioned by
+# `nitrohsm-provision`, generate the appropriate TUF keypairs.
+
+import argparse
+import logging
+from pathlib import Path
+import platform
+import shutil
+import subprocess
+import sys
+
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger("generate-nitrohsm-keys")
+
+_ALGORITHM_MAP = {"p256": "EC:prime256v1", "p384": "EC:prime384v1"}
+
+_PKCS11_TOOL = shutil.which("pkcs11-tool")
+
+_PKCS11_MODULE_MAP = {
+    ("Darwin", "i386"): Path("/usr/local/lib/opensc-pkcs11.so"),
+    ("Linux", "armv7l"): Path("/usr/lib/arm-linux-gnueabihf/opensc-pkcs11.so"),
+}
+
+_TUF_KEY_CONFIG = {
+    "root": {"pubkey_file_suffix": "root_pubkey.pub"},
+    "targets": {"pubkey_file_suffix": "targets_pubkey.pub"},
+}
+
+# NOTE: This is contrived. It's high enough to be above any default object IDs
+# that might be baked into the Nitrokey HSM.
+_TUF_BASE_KEY_ID = 12
+
+
+def die(msg):
+    print(f"Fatal: {msg}", file=sys.stderr)
+    sys.exit(1)
+
+
+def _get_pkcs11_module():
+    sys_tuple = (platform.system(), platform.processor())
+    pkcs11_module = _PKCS11_MODULE_MAP.get(sys_tuple)
+    if pkcs11_module is None:
+        die(f"This script does not support your (system, processor) tuple: {sys_tuple}")
+
+    if not pkcs11_module.is_file():
+        die(f"Missing PKCS#11 module at {pkcs11_module}")
+
+    logger.debug(f"Found PKCS#11 module: {pkcs11_module}")
+
+    return str(pkcs11_module)
+
+
+def generate_key(type_: str, label: str, key_id: int, pin: str):
+    status = subprocess.run(
+        [
+            _PKCS11_TOOL,
+            "--module",
+            _get_pkcs11_module(),
+            "--login",
+            "--pin",
+            pin,
+            "--keypairgen",
+            "--key-type",
+            type_,
+            "--id",
+            str(key_id),
+            "--label",
+            label,
+        ]
+    )
+
+    if status.returncode != 0:
+        die(
+            f"pkcs11-tool exited with {status.returncode}; manual intervention required"
+        )
+
+
+def extract_pubkey(key_id: int, pubkey_path: Path):
+    if pubkey_path.exists():
+        die(
+            f"Not overwriting extant public key: {pubkey_path}; manual intervention required"
+        )
+
+    status = subprocess.run(
+        [
+            _PKCS11_TOOL,
+            "--module",
+            _get_pkcs11_module(),
+            "--read-object",
+            "--type",
+            "pubkey",
+            "--id",
+            str(key_id),
+            "-o",
+            str(pubkey_path),
+        ]
+    )
+
+    if status.returncode != 0:
+        die(
+            f"pkcs11-tool exited with {status.returncode}; manual intervention required"
+        )
+
+
+def main():
+    if _PKCS11_TOOL is None:
+        die(f"Could not find pkcs11-tool on the PATH")
+
+    parser = argparse.ArgumentParser()
+    parser.add_argument(
+        "-t", "--type", type=str, required=True, choices=_ALGORITHM_MAP.keys()
+    )
+    parser.add_argument("-p", "--pin", type=str, required=True)
+    parser.add_argument("-s", "--serial", type=str, required=True)
+    parser.add_argument(
+        "-d", "--debug", action="store_true", help="Print debugging messages"
+    )
+
+    args = parser.parse_args()
+    if args.debug:
+        logger.setLevel(logging.DEBUG)
+
+    for (idx, (label, config)) in enumerate(_TUF_KEY_CONFIG.items()):
+        logger.info(f"Performing {label} key generation")
+        key_id = _TUF_BASE_KEY_ID + idx
+        generate_key(_ALGORITHM_MAP[args.type], label, key_id, args.pin)
+
+        pubkey_path = Path(f"{args.serial}_{config['pubkey_file_suffix']}")
+        extract_pubkey(key_id, pubkey_path)
+
+
+if __name__ == "__main__":
+    main()
