@@ -24,7 +24,7 @@ Confirm the presence of **each** of the following:
   * **Exactly three (3)** YubiHSMs
   * **Exactly three (3)** Nitrokey HSMs
 * **At least seven (7)** tamper-evident bags, including evidence labels
-* **At least six (6)** sheets of loose-leaf paper
+* **At least 12 (12)** sheets of loose-leaf paper
 * **At least one (1)** permanent marker
 * **At least one (1)** pair of scissors
 
