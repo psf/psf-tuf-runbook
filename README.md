@@ -4,6 +4,8 @@ psf-tuf-runbook
 This repository contains a runbook and supporting program for the Python Software Foundation's
 TUF key generation and signing ceremonies.
 
+**Due to COVID-19, this document has been modified for a two person, remote ceremony.**
+
 ## Notation
 
 This document is designed to be read as a *runbook* -- a collection of discrete instructions
@@ -14,7 +16,7 @@ We use the following notation:
 * **DO** *actions*: Perform the following actions.
 * **IF** *condition* **THEN** *actions*: If *condition* is met, then perform the following *actions*.
 * **GO TO** *heading*: Go to the referenced heading in the runbook and perform the stated actions
-thereon. Do **not** return to the previous section unless indicated.
+thereon.
 * **END**: You've reached an end state.
 
 1. **DO GO TO** [Start](#start)
@@ -25,63 +27,32 @@ thereon. Do **not** return to the previous section unless indicated.
 
 ## Prepare the environment
 
-1. **DO** have the following equipment ready:
-
-    * The trusted offline computer, in tamper-evident packaging
-    * A camera or phone capable of taking pictures
-    * A USB drive or other removable flash storage labeled "PUBLIC" and formatted as FAT32
-    * The HSM being provisioned, in tamper-evident packaging
-    * New tamper-evident bags for storing the HSM and flash storage
-    * A permanent marker pen
-    * A pair of scissors
-    * Your signing body ID card
+1. **DO** perform the [pre-ceremony](PRE-CEREMONY.md).
 
 1. **IF** you have a phone or other personal devices, **THEN** set them on airplane mode.
 
-1. **DO** take pictures of the following:
+1. **DO** boot the trusted offline machine, and log into it using the credentials provided
+during the pre-ceremony.
 
-    * The HSM, in its tamper-evident packaging
+1. **DO** take pictures of each HSM, in their tamper-evident bags.
 
-1. **DO** remove the HSM from its packaging.
+1. **DO** remove `YubiHSM2-1` from its tamper-evident bag and **GO TO**
+[Provisioning the Provisioning the YubiHSM 2](#provisioning-the-yubihsm-2)
 
-<!-- 1. **DO** clone this repository:
+1. **DO** remove `YubiHSM2-2` from its tamper-evident bag and **GO TO**
+[Provisioning the Provisioning the YubiHSM 2](#provisioning-the-yubihsm-2)
 
-```bash
-$ git clone https://github.com/trailofbits/psf-tuf-runbook
-``` -->
+1. **DO** remove `YubiHSM2-3` from its tamper-evident bag and **GO TO**
+[Provisioning the Provisioning the YubiHSM 2](#provisioning-the-yubihsm-2)
 
-1. **DO GO TO** [Determining the HSM](#determining-the-hsm)
+1. **DO** remove `Nitrokey HSM-4` from its tamper-evident bag and **GO TO**
+[Provisioning the Provisioning the Nitrokey HSM](#provisioning-the-nitrokey-hsm)
 
-## Determining the HSM
+1. **DO** remove `Nitrokey HSM-5` from its tamper-evident bag and **GO TO**
+[Provisioning the Provisioning the Nitrokey HSM](#provisioning-the-nitrokey-hsm)
 
-1. **DO** determine your signing body ID. Your signing body ID should be written on a label
-on the tamper-evident bag that contains the HSM.
-
-    Your signing body ID looks like "${Model}-${Number}". For example:
-
-    * `YubiHSM2-1`
-    * `Nitrokey HSM-4`
-
-1. **DO** determine your key type, using your signing body ID and the attestation chart below:
-
-    ![The TUF key generation attestation model](./assets/tuf-keygen-attestation-model.jpg)
-
-    For example, if your signing body ID is `YubiHSM2-2`, then your key type is P-384.
-
-1. **IF** you have a YubiHSM 2 that either has *not* been provisioned in a previous ceremony *or*
-needs to be reprovisioned, **THEN GO TO** [Provisioning the YubiHSM 2](#provisioning-the-yubihsm-2).
-
-1. **IF** you have a YubiHSM 2 that has already been provisioned in a previous ceremony,
-**THEN GO TO** [Signing with the YubiHSM 2](#signing-with-the-yubihsm-2).
-
-1. **IF** you have a Nitrokey HSM that either has *not* been provisioned in a previous ceremony *or*
-needs to be reprovisioned,
-**THEN GO TO** [Provisioning the Nitrokey HSM](#provisioning-the-nitrokey-hsm).
-
-1. **IF** you have a Nitrokey HSM that has already been provisioned in a previous ceremony,
-**THEN GO TO** [Signing with the Nitrokey HSM](#signing-with-the-nitrokey-hsm).
-
-1. **IF** you did not go to a header above, **THEN** you have an unsupported HSM.
+1. **DO** remove `Nitrokey HSM-6` from its tamper-evident bag and **GO TO**
+[Provisioning the Provisioning the Nitrokey HSM](#provisioning-the-nitrokey-hsm)
 
 1. **END**
 
@@ -122,7 +93,7 @@ offline computer.
     * **IF** your keytype is "P-384", **THEN** pass `--type p384`
 
     ```bash
-    $ ./bin/yubihsm-provision --type KEYTYPE
+    $ ./bin/yubihsm-provision --type KEY-TYPE
     ```
 
 1. **DO** wait for this prompt:
@@ -144,20 +115,6 @@ offline computer.
     ```
 
 1. **DO** hit `y` once ready to continue.
-
-<!-- 1. **IF** you see the either of the following error outputs:
-
-    ```
-    Fatal: Attestation file already exists: root_attestation.der; aborting
-    ```
-
-    or:
-
-    ```
-    Fatal: Attestation file already exists: targets_attestation.der; aborting
-    ```
-
-    **THEN** you have intermediate files left over from a previous provisioning.  -->
 
 1. **DO** wait for the following output and prompt:
 
@@ -208,7 +165,7 @@ unique.
 
 1. **DO** re-enter your authentication key password.
 
-1. **DO** wait for the program to exist.
+1. **DO** wait for the program to exit.
 
 1. **DO** check for the following files in the runbook directory:
 
@@ -222,6 +179,12 @@ unique.
 
     Where `XXXXXXXXXX` is the 0-prefixed serial number.
 
+1. **DO** write down your authentication key password on a *separate* piece of loose-leaf, and fold it.
+
+1. **DO** seal the provisioned HSM and folded authentication key password in a tamper-evident bag.
+
+1. **DO** label the bag with the HSM's signing body ID.
+
 ## Provisioning the Nitrokey HSM
 
 1. **DO** determine the current Security Officer PIN ("SO-PIN"):
@@ -234,13 +197,10 @@ unique.
 
 1. **DO** ensure that exactly one (1) Nitrokey HSM is inserted into the trusted offline computer.
 
-1. **DO** run the `./bin/nitrohsm-provision` script, using your SO-PIN and key type according to the following rules:
-
-    * **IF** your keytype is "P-256", **THEN** pass `--type p256`
-    * **IF** your keytype is "P-384", **THEN** pass `--type p384`
+1. **DO** run the `./bin/nitrohsm-provision` script, using your SO-PIN:
 
     ```bash
-    $ ./bin/nitrohsm-provision --so-pin SO-PIN --type KEYTYPE
+    $ ./bin/nitrohsm-provision --so-pin SO-PIN
     ```
 
 1. **DO** wait for this prompt:
@@ -282,7 +242,9 @@ unique.
     Re-enter your NEW Security Officer PIN:
     ```
 
-1. **DO** write down and re-enter the *new* Security Officer PIN.
+1. **DO** write down the *new* Security Officer PIN on a *separate* piece of loose-leaf, and fold it.
+
+1. **DO** re-enter the *new* Security Officer PIN.
 
 1. **DO** wait for the following output and prompt:
 
@@ -292,6 +254,34 @@ unique.
     Re-enter your NEW user PIN:
     ```
 
-1. **DO** write down and re-enter the *new* user PIN.
+1. **DO** write down the *new* user PIN on a *separate* piece of loose-leaf, and fold it.
 
-<!-- TODO: key generation -->
+1. **DO** re-enter the *new* user PIN.
+
+1. **DO** wait for the following output:
+
+    ```
+    Success! We've reinitialized the Nitrokey with a new SO PIN and user PIN.
+    Use this serial number when doing key generation: XXXXXXXXXXX
+    ```
+
+1. **DO** write down the serial number printed above on a *separate* piece of loose-leaf.
+
+1. **DO** run the `./bin/generate-nitrohsm-keys` script, using your key type according to the following rules:
+
+    * **IF** your keytype is "P-256", **THEN** pass `--type p256`
+    * **IF** your keytype is "P-384", **THEN** pass `--type p384`
+
+    ```bash
+    $ ./bin/generate-nitrohsm-keys --type KEY-TYPE --pin USER-PIN --serial XXXXXXXXXXX
+    ```
+
+    where `USER-PIN` is your *new* user PIN and `XXXXXXXXXXX` is the Nitrokey HSM's serial
+    number, as printed.
+
+1. **DO** check for the following files in the runbook directory:
+
+    ```
+    XXXXXXXXXXX_root_pubkey.pub
+    XXXXXXXXXXX_targets_pubkey.pub
+    ```
