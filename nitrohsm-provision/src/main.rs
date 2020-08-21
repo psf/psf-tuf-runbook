@@ -308,7 +308,7 @@ fn perform_factory_reset(
         return Err(format!("Failed to close session: {}", e));
     }
 
-    println!("Success! We're reinitialized the Nitrokey with a new SO PIN and user PIN.");
+    println!("Success! We've reinitialized the Nitrokey with a new SO PIN and user PIN.");
 
     // Return the new user PIN so that we can use it for key generation later.
     Ok(new_user_pin)
