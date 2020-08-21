@@ -334,13 +334,15 @@ fn run() -> Result<(), String> {
 
     big_scary_banner()?;
 
-    let (pkcs11_ctx, slot, _) = find_hsm()?;
+    let (pkcs11_ctx, slot, serial_number) = find_hsm()?;
 
     // Step 1: Ensure that the Nitrokey is in an acceptable state. This includes:
     //  1. Reinitializing the HSM using the current SO PIN.
     //  2. Setting a new SO PIN.
     //  3. Creating the normal user account and PIN.
     perform_factory_reset(&pkcs11_ctx, slot, &so_pin)?;
+
+    println!("Use this serial number when doing key generation: {}", serial_number);
 
     Ok(())
 }
