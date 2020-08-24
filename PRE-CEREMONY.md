@@ -61,17 +61,21 @@ On the preparation computer:
 
 On the preparation computer:
 
-* Download the prepared ceremony image:
+* Download the prepared ceremony image, hosted [here](https://drive.google.com/file/d/1eC8bFpLgccBts6uQCYeDW30kBi_IU2fD/view?usp=sharing).
 
-```bash
-$ curl -o ceremony.iso TODO-URL
-```
+* Confirm the integrity of the ceremony image archive:
 
-* Confirm the integrity of the ceremony image against this checksum: `TODO-CHECKSUM`:
+    * SHA2-256: `1b4cf7a00aff482c5f93a81893629877ff9edfcdcfdb3f172e37bb11afb9b5ef`
 
-```bash
-$ shasum -a 256 ceremony.iso
-```
+    ```bash
+    $ shasum -a 256 runbook.img.zip
+    ```
+
+* Decompress the ceremony image:
+
+    ```bash
+    $ unzip runbook.img.zip
+    ```
 
 * Insert the microSD card into the microSD reader, and insert the microSD reader into the
 desktop.
@@ -95,7 +99,7 @@ $ diskutil unmountDisk /dev/rdiskN
 * Copy the ceremony image onto the block device.
 
 ```bash
-sudo dd bs=1m if=ceremony.iso of=/dev/rdiskN
+sudo dd bs=4m if=runbook.img of=/dev/rdiskN
 ```
 
 where `/dev/rdiskN` is the "raw" block device identified above.
