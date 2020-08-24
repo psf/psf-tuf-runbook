@@ -23,6 +23,7 @@ Confirm the presence of **each** of the following:
 * **Exactly six (6)** HSMs:
   * **Exactly three (3)** YubiHSMs
   * **Exactly three (3)** Nitrokey HSMs
+* **Exactly one (1)** USB flash storage stick, minimum 8GB
 * **At least seven (7)** tamper-evident bags, including evidence labels
 * **At least 12 (12)** sheets of loose-leaf paper
 * **At least one (1)** permanent marker
@@ -35,6 +36,26 @@ Confirm the presence of **each** of the following:
 * Ensure that the tamper-evident bags are intact.
 
 * Ensure that the markers are functional and can correctly mark the tamper-evident bags.
+
+### Format the flash storage stick
+
+On the preparation computer:
+
+* Insert the flash storage stick.
+
+* Open "Disk Utility" and identify the flash storage stick.
+
+* Click "Unmount" if the flash storage stick is mounted.
+
+* Click "Erase".
+
+* Name the stick "TUF" and select `MS-DOS (FAT)` as the format.
+
+* Click "Erase".
+
+* Once formatting is complete, click "Unmount".
+
+* Remove the flash storage stick from the preparation computer.
 
 ### Image and test the Raspberry Pi and peripherals
 
@@ -88,7 +109,7 @@ $ diskutil eject /dev/rdiskN
 
 * Insert the microSD card into the Raspberry Pi.
 
-* Connect the Raspberry Pi to all peripherals **except** power.
+* Connect the Raspberry Pi to all peripherals **except** power and the flask stick.
 
 * Connect the Raspberry Pi to power, and confirm boot on the monitor.
 
@@ -97,6 +118,15 @@ $ diskutil eject /dev/rdiskN
 Username: `pi`
 
 Password: `raspberry`
+
+* Insert the flash storage stick into the Raspberry Pi.
+
+* Identify the flash storage stick's device and confirm that it mounts:
+
+```bash
+$ sudo mount -t vfat /dev/sda1 /media/ceremony-products -o umask=000
+$ sudo umount /media/ceremony-products
+```
 
 * Confirm the presence of the following programs, using `which`:
 
@@ -109,13 +139,14 @@ $ which nitrohsm-provision
 /home/pi/bin/nitrohsm-provision
 ```
 
-* Power the Raspberry Pi off and disconnect all peripherals **except** for the microSD card.
+* Power the Raspberry Pi off and disconnect all peripherals **except** for the microSD card
+and flash stick.
 
 ```bash
 $ sudo shutdown
 ```
 
-* Store the Raspberry Pi and attached microSD card in a tamper-evident bag.
+* Store the Raspberry Pi and attached microSD card and flash stick in a tamper-evident bag.
 
 ### Test the ceremony communication computer
 

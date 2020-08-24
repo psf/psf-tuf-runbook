@@ -34,6 +34,12 @@ thereon.
 1. **DO** boot the trusted offline machine, and log into it using the credentials provided
 during the pre-ceremony.
 
+1. **DO** mount the flash storage stick:
+
+```bash
+$ sudo mount -t vfat /dev/sda1 /media/ceremony-products -o umask=000
+```
+
 1. **DO** take pictures of each HSM, in their tamper-evident bags.
 
 1. **DO** remove `YubiHSM2-1` from its tamper-evident bag and **GO TO**
@@ -53,6 +59,13 @@ during the pre-ceremony.
 
 1. **DO** remove `Nitrokey HSM-6` from its tamper-evident bag and **GO TO**
 [Provisioning the Provisioning the Nitrokey HSM](#provisioning-the-nitrokey-hsm)
+
+1. **DO** unmount the flash storage stick:
+
+```bash
+$ sync
+$ sudo umount /media/ceremony-products
+```
 
 1. **END**
 
@@ -167,6 +180,8 @@ unique.
 
 1. **DO** wait for the program to exit.
 
+1. **DO** write down your authentication key password on a *separate* piece of loose-leaf, and fold it.
+
 1. **DO** check for the following files in the runbook directory:
 
     ```
@@ -179,11 +194,30 @@ unique.
 
     Where `XXXXXXXXXX` is the 0-prefixed serial number.
 
-1. **DO** write down your authentication key password on a *separate* piece of loose-leaf, and fold it.
+1. **DO** run the `./bin/raw-ec-points-to-pem` script with each public key generated above, using your key type according to the following rules:
+
+    * **IF** your keytype is "P-256", **THEN** pass `--type p256`
+    * **IF** your keytype is "P-384", **THEN** pass `--type p384`
+
+    ```bash
+    $ ./bin/raw-ec-points-to-pem --type KEY-TYPE XXXXXXXXXX_root_pubkey.pub
+    $ ./bin/raw-ec-points-to-pem --type KEY-TYPE XXXXXXXXXX_targets_pubkey.pub
+    ```
+
+1. **DO** remove the HSM.
 
 1. **DO** seal the provisioned HSM and folded authentication key password in a tamper-evident bag.
 
-1. **DO** label the bag with the HSM's signing body ID.
+1. **DO** label the bag with the HSM's signing body ID and 0-prefixed serial number.
+
+1. **DO** run the following to copy the public ceremony products:
+
+    ```bash
+    $ cp XXXXXXXXXX_* /media/ceremony-products
+    $ sync
+    ```
+
+    Where `XXXXXXXXXX` is the 0-prefixed serial number.
 
 ## Provisioning the Nitrokey HSM
 
@@ -283,5 +317,22 @@ unique.
 
     ```
     XXXXXXXXXXX_root_pubkey.pub
+    XXXXXXXXXXX_root_pubkey.pem
     XXXXXXXXXXX_targets_pubkey.pub
+    XXXXXXXXXXX_targets_pubkey.pem
     ```
+
+1. **DO** remove the HSM.
+
+1. **DO** seal the provisioned HSM and folded Security Officer and user PINs in a tamper-evident bag.
+
+1. **DO** label the bag with the HSM's signing body ID and serial number.
+
+1. **DO** run the following to copy the ceremony products:
+
+    ```bash
+    $ cp XXXXXXXXXXX_* /media/ceremony-products
+    $ sync
+    ```
+
+    Where `XXXXXXXXXXX` is the Nitrokey HSM's serial number.

@@ -16,6 +16,8 @@ logger = logging.getLogger("generate-nitrohsm-keys")
 
 _ALGORITHM_MAP = {"p256": "EC:prime256v1", "p384": "EC:prime384v1"}
 
+_OPENSSL = shutil.which("openssl")
+
 _PKCS11_TOOL = shutil.which("pkcs11-tool")
 
 _PKCS11_MODULE_MAP = {
@@ -24,8 +26,14 @@ _PKCS11_MODULE_MAP = {
 }
 
 _TUF_KEY_CONFIG = {
-    "root": {"pubkey_file_suffix": "root_pubkey.pub"},
-    "targets": {"pubkey_file_suffix": "targets_pubkey.pub"},
+    "root": {
+        "raw_pubkey_file_suffix": "root_pubkey.pub",
+        "pem_pubkey_file_suffix": "root_pubkey.pem",
+    },
+    "targets": {
+        "raw_pubkey_file_suffix": "targets_pubkey.pub",
+        "pem_pubkey_file_suffix": "targets_pubkey.pem",
+    },
 }
 
 # NOTE: This is contrived. It's high enough to be above any default object IDs
@@ -80,7 +88,8 @@ def generate_key(type_: str, label: str, key_id: int, pin: str):
 def extract_pubkey(key_id: int, pubkey_path: Path):
     if pubkey_path.exists():
         die(
-            f"Not overwriting extant public key: {pubkey_path}; manual intervention required"
+            f"Not overwriting extant public key: {pubkey_path}; "
+            "manual intervention required"
         )
 
     status = subprocess.run(
@@ -104,7 +113,35 @@ def extract_pubkey(key_id: int, pubkey_path: Path):
         )
 
 
+def convert_pubkey(raw_pubkey_path: Path, pem_pubkey_path: Path):
+    if pem_pubkey_path.exists():
+        die(
+            f"Not overwriting extant PEM-formatted pubkey: {pem_pubkey_path}; "
+            "manual intervention required"
+        )
+
+    status = subprocess.run(
+        [
+            _OPENSSL,
+            "ec",
+            "-inform",
+            "DER",
+            "-pubin",
+            "-in",
+            str(raw_pubkey_path),
+            "-out",
+            str(pem_pubkey_path),
+        ]
+    )
+
+    if status.returncode != 0:
+        die(f"openssl exited with {status.returncode}; manual intervention required")
+
+
 def main():
+    if _OPENSSL is None:
+        die(f"Could not find openssl on the PATH")
+
     if _PKCS11_TOOL is None:
         die(f"Could not find pkcs11-tool on the PATH")
 
@@ -127,8 +164,11 @@ def main():
         key_id = _TUF_BASE_KEY_ID + idx
         generate_key(_ALGORITHM_MAP[args.type], label, key_id, args.pin)
 
-        pubkey_path = Path(f"{args.serial}_{config['pubkey_file_suffix']}")
-        extract_pubkey(key_id, pubkey_path)
+        raw_pubkey_path = Path(f"{args.serial}_{config['raw_pubkey_file_suffix']}")
+        extract_pubkey(key_id, raw_pubkey_path)
+
+        pem_pubkey_path = Path(f"{args.serial}_{config['pem_pubkey_file_suffix']}")
+        convert_pubkey(raw_pubkey_path, pem_pubkey_path)
 
 
 if __name__ == "__main__":
