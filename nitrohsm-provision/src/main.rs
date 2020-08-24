@@ -8,7 +8,11 @@ use regex::Regex;
 use std::path::Path;
 use std::process;
 
+#[cfg(target_os = "macos")]
 const OPENSC_PKCS11_SO: &'static str = "/usr/local/lib/opensc-pkcs11.so";
+
+#[cfg(all(target_arch = "arm", target_os = "linux"))]
+const OPENSC_PKCS11_SO: &'static str = "/usr/lib/arm-linux-gnueabihf/opensc-pkcs11.so";
 
 const BIG_SCARY_BANNER: &'static str = r#"
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
