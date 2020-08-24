@@ -68,10 +68,10 @@ $ cd ~/psf-tuf-runbook
 
 1. **DO** unmount the flash storage stick:
 
-```bash
-$ sync
-$ sudo umount /media/ceremony-products
-```
+    ```bash
+    $ sync
+    $ sudo umount /media/ceremony-products
+    ```
 
 1. **END**
 
