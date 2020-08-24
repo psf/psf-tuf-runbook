@@ -21,7 +21,7 @@ _OPENSSL = shutil.which("openssl")
 _PKCS11_TOOL = shutil.which("pkcs11-tool")
 
 _PKCS11_MODULE_MAP = {
-    ("Darwin", "i386"): Path("/usr/local/lib/opensc-pkcs11.so"),
+    ("Darwin", "x86_64"): Path("/usr/local/lib/opensc-pkcs11.so"),
     ("Linux", "armv7l"): Path("/usr/lib/arm-linux-gnueabihf/opensc-pkcs11.so"),
 }
 
@@ -47,10 +47,10 @@ def die(msg):
 
 
 def _get_pkcs11_module():
-    sys_tuple = (platform.system(), platform.processor())
+    sys_tuple = (platform.system(), platform.machine())
     pkcs11_module = _PKCS11_MODULE_MAP.get(sys_tuple)
     if pkcs11_module is None:
-        die(f"This script does not support your (system, processor) tuple: {sys_tuple}")
+        die(f"This script does not support your (system, machine) tuple: {sys_tuple}")
 
     if not pkcs11_module.is_file():
         die(f"Missing PKCS#11 module at {pkcs11_module}")
