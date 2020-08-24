@@ -10,6 +10,6 @@ edition = "2018"
 clap = "2.33"
 dialoguer = "0.5.0"
 lazy_static = "1.4"
-pkcs11 = { git = "https://github.com/trailofbits/rust-pkcs11", branch = "ww/fix-unknown-error"}
+pkcs11 = { git = "https://github.com/trailofbits/rust-pkcs11", branch = "ww/fix-type-sizes-arm32"}
 rand = "0.7.3"
 regex = "1.3"

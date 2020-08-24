@@ -200,7 +200,7 @@ dependencies = [
 [[package]]
 name = "pkcs11"
 version = "0.6.0"
-source = "git+https://github.com/trailofbits/rust-pkcs11?branch=ww/fix-unknown-error#bd50cbb0bcbea1dd88126ea39cb83e39bff8c10f"
+source = "git+https://github.com/trailofbits/rust-pkcs11?branch=ww/fix-type-sizes-arm32#cc637dbdf9116bf3738852303db2c4f167ca9f85"
 dependencies = [
  "libloading",
  "num-bigint",
