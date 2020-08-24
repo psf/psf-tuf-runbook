@@ -40,6 +40,12 @@ during the pre-ceremony.
 $ sudo mount -t vfat /dev/sda1 /media/ceremony-products -o umask=000
 ```
 
+1. **DO** change directory to the runbook directory:
+
+```bash
+$ cd ~/psf-tuf-runbook
+```
+
 1. **DO** take pictures of each HSM, in their tamper-evident bags.
 
 1. **DO** remove `YubiHSM2-1` from its tamper-evident bag and **GO TO**
@@ -78,17 +84,6 @@ $ sudo umount /media/ceremony-products
     In this picture, the serial number is `7550054`. Note that in later steps the serial number will
     be 0-padded to 10 digits, like `0007550054`.
 
-1. **DO** confirm the hash of the `./bin/yubihsm-provision` binary against the following checksums with
-the following commands:
-
-    * SHA1: **TODO**
-    * SHA2-256: **TODO**
-
-    ```bash
-    $ shasum -a 1 ./bin/yubihsm-provision
-    $ shasum -a 256 ./bin/yubihsm-provision
-    ```
-
 1. **IF** the YubiHSM 2 is being reprovisioned due to a compromise or failed ceremony, **THEN** you
 must perform a physical reset.
 
@@ -100,13 +95,13 @@ offline computer.
 
 1. **DO** ensure that exactly 1 (one) YubiHSM 2 is inserted into the trusted offline computer.
 
-1. **DO** run the `./bin/yubihsm-provision` binary, using your key type according to the following rules:
+1. **DO** run the `yubihsm-provision` binary, using your key type according to the following rules:
 
     * **IF** your keytype is "P-256", **THEN** pass `--type p256`
     * **IF** your keytype is "P-384", **THEN** pass `--type p384`
 
     ```bash
-    $ ./bin/yubihsm-provision --type KEY-TYPE
+    $ yubihsm-provision --type KEY-TYPE
     ```
 
 1. **DO** wait for this prompt:
@@ -194,14 +189,14 @@ unique.
 
     Where `XXXXXXXXXX` is the 0-prefixed serial number.
 
-1. **DO** run the `./bin/raw-ec-points-to-pem` script with each public key generated above, using your key type according to the following rules:
+1. **DO** run the `raw-ec-points-to-pem` script with each public key generated above, using your key type according to the following rules:
 
     * **IF** your keytype is "P-256", **THEN** pass `--type p256`
     * **IF** your keytype is "P-384", **THEN** pass `--type p384`
 
     ```bash
-    $ ./bin/raw-ec-points-to-pem --type KEY-TYPE XXXXXXXXXX_root_pubkey.pub
-    $ ./bin/raw-ec-points-to-pem --type KEY-TYPE XXXXXXXXXX_targets_pubkey.pub
+    $ raw-ec-points-to-pem --type KEY-TYPE XXXXXXXXXX_root_pubkey.pub
+    $ raw-ec-points-to-pem --type KEY-TYPE XXXXXXXXXX_targets_pubkey.pub
     ```
 
 1. **DO** remove the HSM.
@@ -231,10 +226,10 @@ unique.
 
 1. **DO** ensure that exactly one (1) Nitrokey HSM is inserted into the trusted offline computer.
 
-1. **DO** run the `./bin/nitrohsm-provision` script, using your SO-PIN:
+1. **DO** run the `nitrohsm-provision` script, using your SO-PIN:
 
     ```bash
-    $ ./bin/nitrohsm-provision --so-pin SO-PIN
+    $ nitrohsm-provision --so-pin SO-PIN
     ```
 
 1. **DO** wait for this prompt:
@@ -301,13 +296,13 @@ unique.
 
 1. **DO** write down the serial number printed above on a *separate* piece of loose-leaf.
 
-1. **DO** run the `./bin/generate-nitrohsm-keys` script, using your key type according to the following rules:
+1. **DO** run the `generate-nitrohsm-keys` script, using your key type according to the following rules:
 
     * **IF** your keytype is "P-256", **THEN** pass `--type p256`
     * **IF** your keytype is "P-384", **THEN** pass `--type p384`
 
     ```bash
-    $ ./bin/generate-nitrohsm-keys --type KEY-TYPE --pin USER-PIN --serial XXXXXXXXXXX
+    $ generate-nitrohsm-keys --type KEY-TYPE --pin USER-PIN --serial XXXXXXXXXXX
     ```
 
     where `USER-PIN` is your *new* user PIN and `XXXXXXXXXXX` is the Nitrokey HSM's serial

@@ -134,10 +134,26 @@ $ sudo umount /media/ceremony-products
 $ which pkcs11-tool
 /usr/bin/pkcs11-tool
 $ which yubihsm-provision
-/home/pi/bin/yubihsm-provision
+/home/pi/psf-tuf-runbook/bin/yubihsm-provision
 $ which nitrohsm-provision
-/home/pi/bin/nitrohsm-provision
+/home/pi/psf-tuf-runbook/bin/nitrohsm-provision
 ```
+
+1. Confirm the hash of the `yubihsm-provision` binary against the following checksum:
+
+    * SHA2-256: `f47e247f0739cf919baaef4079a1a8023adeb6c95957cfc8f3ca094dd4c80edf`
+
+    ```bash
+    $ shasum -a 256 $(which yubihsm-provision)
+    ```
+
+1. Confirm the hash of the `nitrohsm-provision` binary against the following checksum:
+
+    * SHA2-256: `9d89fd46fb4ce71a9eb21b743a0ad68112c80f26e51f959120bc92a6f1d3806f`
+
+    ```bash
+    $ shasum -a 256 $(which nitrohsm-provision)
+    ```
 
 * Power the Raspberry Pi off and disconnect all peripherals **except** for the microSD card
 and flash stick.
