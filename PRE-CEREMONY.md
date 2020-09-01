@@ -30,6 +30,7 @@ Confirm the presence of **each** of the following:
 * **At least 12 (12)** sheets of loose-leaf paper
 * **At least one (1)** permanent marker
 * **At least one (1)** pair of scissors
+* **At least one (1)** 6-sided die
 
 Optionally, allow for **each** of the following:
 
@@ -62,6 +63,77 @@ On the preparation computer:
 * Once formatting is complete, click "Unmount".
 
 * Remove the flash storage stick from the preparation computer.
+
+### Pre-generate HSM passwords and PINs
+
+#### Pre-generate authentication key passwords for the YubiHSMs
+
+For each of the YubiHSMs:
+
+* Generate a 12-character password for the authentication key, using a 6-sided die and the following table:
+
+    ```
+                  First Roll
+             1   2   3   4   5   6
+
+    S  1     a   b   c   d   e   f
+    e  2     g   h   i   j   k   l
+    c  3     m   n   o   p   q   r
+    o  4     s   t   u   v   w   x
+    n  5     y   z   0   1   2   3
+    d  6     4   5   6   7   8   9
+    ```
+
+    (Modified from [The Diceware FAQ](http://world.std.com/~reinhold/dicewarefaq.html))
+
+* On a new sheet of paper, write down the authentication key password *along with the signing body ID*.
+Fold the paper.
+
+#### Pre-generate Security Officer and User PINs for the Nitrokey HSMs
+
+For each of the three Nitrokey HSMs:
+
+* Generate a 16-digit hexadecimal password for the Security Officer PIN, using a 6-sided die and the following table:
+
+    ```
+                  First Roll
+             1   2   3   4   5   6
+         --------------------------
+    S  1 |   0   1   2   3   4   5
+    e  2 |   6   7   8   9   A   B
+    c  3 |   C   D   E   F   0   1
+    o  4 |   2   3   4   5   6   7
+    n  5 |   8   9   A   B   C   D
+    d  6 |   E   F   *   *   *   *
+    ```
+
+    ...where `*` indicates a re-roll.
+
+    (Modified from [The Diceware FAQ](http://world.std.com/~reinhold/dicewarefaq.html)).
+
+* Generate a 6-character password for the User PIN, using a 6-sided die and the following table:
+
+    ```
+                  First Roll
+             1   2   3   4   5   6
+
+    S  1     a   b   c   d   e   f
+    e  2     g   h   i   j   k   l
+    c  3     m   n   o   p   q   r
+    o  4     s   t   u   v   w   x
+    n  5     y   z   0   1   2   3
+    d  6     4   5   6   7   8   9
+    ```
+
+    (Modified from [The Diceware FAQ](http://world.std.com/~reinhold/dicewarefaq.html))
+
+* On a sheet of paper, write down the Security Officer PIN and User PIN down *along with the signing body ID*.
+Fold the paper.
+
+#### Store the pre-generated passwords and PINs
+
+* Once all YubiHSM passwords and Nitrokey HSM PINs have been generated and written down,
+place them, **folded**, into a tamper-evident bag. Seal the bag.
 
 ### Image and test the Raspberry Pi and peripherals
 
