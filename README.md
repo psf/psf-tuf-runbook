@@ -36,15 +36,15 @@ during the pre-ceremony.
 
 1. **DO** mount the flash storage stick:
 
-```bash
-$ sudo mount -t vfat /dev/sda1 /media/ceremony-products -o umask=000
-```
+    ```bash
+    $ sudo mount -t vfat /dev/sda1 /media/ceremony-products -o umask=000
+    ```
 
 1. **DO** change directory to the runbook directory:
 
-```bash
-$ cd ~/psf-tuf-runbook
-```
+    ```bash
+    $ cd ~/psf-tuf-runbook
+    ```
 
 1. **DO** take pictures of each HSM, in their tamper-evident bags.
 
