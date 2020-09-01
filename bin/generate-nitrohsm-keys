@@ -86,12 +86,6 @@ def generate_key(type_: str, label: str, key_id: int, pin: str):
 
 
 def extract_pubkey(key_id: int, pubkey_path: Path):
-    if pubkey_path.exists():
-        die(
-            f"Not overwriting extant public key: {pubkey_path}; "
-            "manual intervention required"
-        )
-
     status = subprocess.run(
         [
             _PKCS11_TOOL,
@@ -114,12 +108,6 @@ def extract_pubkey(key_id: int, pubkey_path: Path):
 
 
 def convert_pubkey(raw_pubkey_path: Path, pem_pubkey_path: Path):
-    if pem_pubkey_path.exists():
-        die(
-            f"Not overwriting extant PEM-formatted pubkey: {pem_pubkey_path}; "
-            "manual intervention required"
-        )
-
     status = subprocess.run(
         [
             _OPENSSL,
@@ -140,10 +128,10 @@ def convert_pubkey(raw_pubkey_path: Path, pem_pubkey_path: Path):
 
 def main():
     if _OPENSSL is None:
-        die(f"Could not find openssl on the PATH")
+        die("Could not find openssl on the PATH")
 
     if _PKCS11_TOOL is None:
-        die(f"Could not find pkcs11-tool on the PATH")
+        die("Could not find pkcs11-tool on the PATH")
 
     parser = argparse.ArgumentParser()
     parser.add_argument(
@@ -162,12 +150,23 @@ def main():
     for (idx, (label, config)) in enumerate(_TUF_KEY_CONFIG.items()):
         logger.info(f"Performing {label} key generation")
         key_id = _TUF_BASE_KEY_ID + idx
-        generate_key(_ALGORITHM_MAP[args.type], label, key_id, args.pin)
 
         raw_pubkey_path = Path(f"{args.serial}_{config['raw_pubkey_file_suffix']}")
-        extract_pubkey(key_id, raw_pubkey_path)
+        if raw_pubkey_path.exists():
+            die(
+                f"Not overwriting extant public key: {raw_pubkey_path}; "
+                "manual intervention required"
+            )
 
         pem_pubkey_path = Path(f"{args.serial}_{config['pem_pubkey_file_suffix']}")
+        if pem_pubkey_path.exists():
+            die(
+                f"Not overwriting extant PEM-formatted pubkey: {pem_pubkey_path}; "
+                "manual intervention required"
+            )
+
+        generate_key(_ALGORITHM_MAP[args.type], label, key_id, args.pin)
+        extract_pubkey(key_id, raw_pubkey_path)
         convert_pubkey(raw_pubkey_path, pem_pubkey_path)
 
 
