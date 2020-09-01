@@ -12,6 +12,8 @@ Confirm the presence of **each** of the following:
   * The preparation steps below assume that the computer is running macOS
 * **Exactly one (1)** communication computer
   * This *MAY* be the same as the preparation computer
+* **Exactly one (1)** digital camera
+  * This *MAY* be a smartphone in airplane mode.
 * **Exactly one (1)** external monitor, HDMI compatible
 * **Exactly one (1)** HDMI cable
 * **Exactly one (1)** USB keyboard
@@ -28,6 +30,10 @@ Confirm the presence of **each** of the following:
 * **At least 12 (12)** sheets of loose-leaf paper
 * **At least one (1)** permanent marker
 * **At least one (1)** pair of scissors
+
+Optionally, allow for **each** of the following:
+
+* A USB-A extender
 
 ## Preparation
 
