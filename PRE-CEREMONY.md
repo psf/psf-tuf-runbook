@@ -61,11 +61,11 @@ On the preparation computer:
 
 On the preparation computer:
 
-* Download the prepared ceremony image, hosted [here](https://drive.google.com/file/d/1eC8bFpLgccBts6uQCYeDW30kBi_IU2fD/view?usp=sharing).
+* Download the prepared ceremony image, hosted [here](https://drive.google.com/file/d/1YJyOGuhXkOVXxXk4p70_s5u4plOBAAC8/view?usp=sharing).
 
 * Confirm the integrity of the ceremony image archive:
 
-    * SHA2-256: `1b4cf7a00aff482c5f93a81893629877ff9edfcdcfdb3f172e37bb11afb9b5ef`
+    * SHA2-256: `24981cb828ffbdf804f4cf177a6179d64527570e9909299e269c3f9083d21fc6`
 
     ```bash
     $ shasum -a 256 runbook.img.zip
@@ -77,14 +77,22 @@ On the preparation computer:
     $ unzip runbook.img.zip
     ```
 
+* Confirm the integrity of the ceremony image:
+
+    * SHA2-256: `0bba7b046ef50df390af646b564b571077b5ceef9c9b03bb41089d9ed6751c32`
+
+    ```bash
+    $ shasum -a 256 runbook.img
+    ```
+
 * Insert the microSD card into the microSD reader, and insert the microSD reader into the
 desktop.
 
 * Identify the block device associated with the microSD card.
 
-```bash
-$ diskutil list
-```
+    ```bash
+    $ diskutil list
+    ```
 
 The block device should have a path in the format `/dev/diskN`, where `N` is the device index.
 
@@ -92,24 +100,24 @@ We will use `/dev/rdiskN` below for the "raw" device, for performance reasons.
 
 * Ensure that the block device is fully unmounted.
 
-```bash
-$ diskutil unmountDisk /dev/rdiskN
-```
+    ```bash
+    $ diskutil unmountDisk /dev/rdiskN
+    ```
 
 * Copy the ceremony image onto the block device.
 
-```bash
-sudo dd bs=4m if=runbook.img of=/dev/rdiskN
-```
+    ```bash
+    sudo dd bs=4m if=runbook.img of=/dev/rdiskN
+    ```
 
-where `/dev/rdiskN` is the "raw" block device identified above.
+    where `/dev/rdiskN` is the "raw" block device identified above.
 
 * Safely sync and eject the microSD card.
 
-```bash
-$ sync
-$ diskutil eject /dev/rdiskN
-```
+    ```bash
+    $ sync
+    $ diskutil eject /dev/rdiskN
+    ```
 
 * Insert the microSD card into the Raspberry Pi.
 
@@ -119,29 +127,29 @@ $ diskutil eject /dev/rdiskN
 
 * Log into the Raspberry Pi on the prompt with the following credentials:
 
-Username: `pi`
+    Username: `pi`
 
-Password: `raspberry`
+    Password: `raspberry`
 
 * Insert the flash storage stick into the Raspberry Pi.
 
 * Identify the flash storage stick's device and confirm that it mounts:
 
-```bash
-$ sudo mount -t vfat /dev/sda1 /media/ceremony-products -o umask=000
-$ sudo umount /media/ceremony-products
-```
+    ```bash
+    $ sudo mount -t vfat /dev/sda1 /media/ceremony-products -o umask=000
+    $ sudo umount /media/ceremony-products
+    ```
 
 * Confirm the presence of the following programs, using `which`:
 
-```bash
-$ which pkcs11-tool
-/usr/bin/pkcs11-tool
-$ which yubihsm-provision
-/home/pi/psf-tuf-runbook/bin/yubihsm-provision
-$ which nitrohsm-provision
-/home/pi/psf-tuf-runbook/bin/nitrohsm-provision
-```
+    ```bash
+    $ which pkcs11-tool
+    /usr/bin/pkcs11-tool
+    $ which yubihsm-provision
+    /home/pi/psf-tuf-runbook/bin/yubihsm-provision
+    $ which nitrohsm-provision
+    /home/pi/psf-tuf-runbook/bin/nitrohsm-provision
+    ```
 
 1. Confirm the hash of the `yubihsm-provision` binary against the following checksum:
 
@@ -162,9 +170,9 @@ $ which nitrohsm-provision
 * Power the Raspberry Pi off and disconnect all peripherals **except** for the microSD card
 and flash stick.
 
-```bash
-$ sudo shutdown
-```
+    ```bash
+    $ sudo shutdown
+    ```
 
 * Store the Raspberry Pi and attached microSD card and flash stick in a tamper-evident bag.
 
