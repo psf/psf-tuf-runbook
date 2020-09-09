@@ -100,11 +100,11 @@ For each of the three Nitrokey HSMs:
              1   2   3   4   5   6
          --------------------------
     S  1 |   0   1   2   3   4   5
-    e  2 |   6   7   8   9   A   B
-    c  3 |   C   D   E   F   0   1
+    e  2 |   6   7   8   9   a   b
+    c  3 |   c   d   f   f   0   1
     o  4 |   2   3   4   5   6   7
-    n  5 |   8   9   A   B   C   D
-    d  6 |   E   F   *   *   *   *
+    n  5 |   8   9   a   b   c   d
+    d  6 |   e   f   *   *   *   *
     ```
 
     ...where `*` indicates a re-roll.
