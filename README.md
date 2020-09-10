@@ -66,6 +66,12 @@ during the pre-ceremony.
 1. **DO** remove `Nitrokey HSM-6` from its tamper-evident bag and **GO TO**
 [Provisioning the Provisioning the Nitrokey HSM](#provisioning-the-nitrokey-hsm)
 
+1. **DO** copy the ceremony products to the flash storage stick:
+
+    ```bash
+    cp -R ./ceremony-products /media/ceremony-products
+    ```
+
 1. **DO** unmount the flash storage stick:
 
     ```bash
@@ -158,10 +164,9 @@ offline computer.
 
 1. **DO** hit `y` once ready to continue.
 
-1. **DO** enter your new authentication key password. This password should be long, random, and
-unique.
+1. **DO** enter the new authentication key password generated for this YubiHSM during the pre-ceremony.
 
-1. **DO** re-enter your authentication key password.
+1. **DO** re-enter the authentication key password.
 
 1. **DO** wait for the following output:
 
@@ -171,20 +176,26 @@ unique.
     We're creating our TUF keys and attestation certificates now.
     ```
 
-1. **DO** re-enter your authentication key password.
+1. **DO** re-enter the authentication key password.
 
 1. **DO** wait for the program to exit.
-
-1. **DO** write down your authentication key password on a *separate* piece of loose-leaf, and fold it.
 
 1. **DO** check for the following files in the runbook directory:
 
     ```
-    XXXXXXXXXX_cert.der
-    XXXXXXXXXX_root_attestation.der
-    XXXXXXXXXX_root_pubkey.pub
-    XXXXXXXXXX_targets_attestation.der
-    XXXXXXXXXX_targets_pubkey.pub
+    ceremony-products/XXXXXXXXXX/XXXXXXXXXX_cert.der
+    ceremony-products/XXXXXXXXXX/XXXXXXXXXX_root_attestation.der
+    ceremony-products/XXXXXXXXXX/XXXXXXXXXX_root_pubkey.pub
+    ceremony-products/XXXXXXXXXX/XXXXXXXXXX_targets_attestation.der
+    ceremony-products/XXXXXXXXXX/XXXXXXXXXX_targets_pubkey.pub
+    ```
+
+    Where `XXXXXXXXXX` is the 0-prefixed serial number.
+
+1. **DO** change directories to the products directory for the current HSM:
+
+    ```bash
+    cd ceremony-products/XXXXXXXXXX
     ```
 
     Where `XXXXXXXXXX` is the 0-prefixed serial number.
@@ -199,6 +210,12 @@ unique.
     $ raw-ec-points-to-pem --type KEY-TYPE XXXXXXXXXX_targets_pubkey.pub
     ```
 
+1. **DO** change directories back to the runbook directory.
+
+    ```bash
+    cd ~/psf-tuf-runbook
+    ```
+
 1. **DO** remove the HSM.
 
 1. **DO** seal the provisioned HSM and folded authentication key password in a tamper-evident bag.
@@ -206,15 +223,6 @@ unique.
 1. **DO** label the bag with the HSM's signing body ID and 0-prefixed serial number.
 
 1. **DO** hold the sealed tamper-evident bag up to the camera of the communication computer.
-
-1. **DO** run the following to copy the public ceremony products:
-
-    ```bash
-    $ cp XXXXXXXXXX_* /media/ceremony-products
-    $ sync
-    ```
-
-    Where `XXXXXXXXXX` is the 0-prefixed serial number.
 
 ## Provisioning the Nitrokey HSM
 
@@ -268,24 +276,32 @@ unique.
 
     ```
     Success! Reinitialized the HSM.
-    This is your NEW Security Officer PIN: XXXXXXXXXXXXXXXX
-    You MUST write this SO PIN down before continuing.
+    Enter your NEW Security Officer PIN:
+    ```
+
+1. **DO** enter the *new* Security Officer PIN generated for this Nitrokey during the pre-ceremony.
+
+1. **DO** wait for the following prompt:
+
+    ```
     Re-enter your NEW Security Officer PIN:
     ```
 
-1. **DO** write down the *new* Security Officer PIN on a *separate* piece of loose-leaf, and fold it.
-
 1. **DO** re-enter the *new* Security Officer PIN.
 
-1. **DO** wait for the following output and prompt:
+1. **DO** wait for the following prompt:
 
     ```
-    This is your NEW user PIN: XXXXXX
-    You MUST write this user PIN down before continuing.
+    Enter your NEW user PIN:
+    ```
+
+1. **DO** enter the *new* user PIN generated for this Nitrokey during the pre-ceremony.
+
+1. **DO** wait for the following prompt:
+
+    ```
     Re-enter your NEW user PIN:
     ```
-
-1. **DO** write down the *new* user PIN on a *separate* piece of loose-leaf, and fold it.
 
 1. **DO** re-enter the *new* user PIN.
 
@@ -304,19 +320,24 @@ unique.
     * **IF** your keytype is "P-384", **THEN** pass `--type p384`
 
     ```bash
-    $ generate-nitrohsm-keys --type KEY-TYPE --pin USER-PIN --serial XXXXXXXXXXX
+    $ generate-nitrohsm-keys --type KEY-TYPE --serial XXXXXXXXXXX
     ```
 
-    where `USER-PIN` is your *new* user PIN and `XXXXXXXXXXX` is the Nitrokey HSM's serial
-    number, as printed.
+1. **DO** wait for the following prompt:
+
+    ```
+    Enter your user PIN:
+    ```
+
+1. **DO** enter the *new* user PIN.
 
 1. **DO** check for the following files in the runbook directory:
 
     ```
-    XXXXXXXXXXX_root_pubkey.pub
-    XXXXXXXXXXX_root_pubkey.pem
-    XXXXXXXXXXX_targets_pubkey.pub
-    XXXXXXXXXXX_targets_pubkey.pem
+    ceremony-products/XXXXXXXXXXX/XXXXXXXXXXX_root_pubkey.pub
+    ceremony-products/XXXXXXXXXXX/XXXXXXXXXXX_root_pubkey.pem
+    ceremony-products/XXXXXXXXXXX/XXXXXXXXXXX_targets_pubkey.pub
+    ceremony-products/XXXXXXXXXXX/XXXXXXXXXXX_targets_pubkey.pem
     ```
 
 1. **DO** remove the HSM.
@@ -326,12 +347,3 @@ unique.
 1. **DO** label the bag with the HSM's signing body ID and serial number.
 
 1. **DO** hold the sealed tamper-evident bag up to the camera of the communication computer.
-
-1. **DO** run the following to copy the ceremony products:
-
-    ```bash
-    $ cp XXXXXXXXXXX_* /media/ceremony-products
-    $ sync
-    ```
-
-    Where `XXXXXXXXXXX` is the Nitrokey HSM's serial number.

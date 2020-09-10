@@ -4,6 +4,7 @@
 # `nitrohsm-provision`, generate the appropriate TUF keypairs.
 
 import argparse
+import getpass
 import logging
 from pathlib import Path
 import platform
@@ -13,6 +14,8 @@ import sys
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger("generate-nitrohsm-keys")
+
+_CEREMONY_PRODUCTS_DIR = Path("ceremony-products").resolve()
 
 _ALGORITHM_MAP = {"p256": "EC:prime256v1", "p384": "EC:prime384v1"}
 
@@ -137,7 +140,6 @@ def main():
     parser.add_argument(
         "-t", "--type", type=str, required=True, choices=_ALGORITHM_MAP.keys()
     )
-    parser.add_argument("-p", "--pin", type=str, required=True)
     parser.add_argument("-s", "--serial", type=str, required=True)
     parser.add_argument(
         "-d", "--debug", action="store_true", help="Print debugging messages"
@@ -147,25 +149,36 @@ def main():
     if args.debug:
         logger.setLevel(logging.DEBUG)
 
+    user_pin = getpass.getpass(prompt="Enter your user PIN: ")
+
+    output_dir = _CEREMONY_PRODUCTS_DIR / args.serial
+    if not output_dir.is_dir():
+        logger.debug(f"{output_dir} does not exist, creating it")
+        output_dir.mkdir(parents=True)
+
     for (idx, (label, config)) in enumerate(_TUF_KEY_CONFIG.items()):
         logger.info(f"Performing {label} key generation")
         key_id = _TUF_BASE_KEY_ID + idx
 
-        raw_pubkey_path = Path(f"{args.serial}_{config['raw_pubkey_file_suffix']}")
+        raw_pubkey_path = (
+            output_dir / f"{args.serial}_{config['raw_pubkey_file_suffix']}"
+        )
         if raw_pubkey_path.exists():
             die(
                 f"Not overwriting extant public key: {raw_pubkey_path}; "
                 "manual intervention required"
             )
 
-        pem_pubkey_path = Path(f"{args.serial}_{config['pem_pubkey_file_suffix']}")
+        pem_pubkey_path = (
+            output_dir / f"{args.serial}_{config['pem_pubkey_file_suffix']}"
+        )
         if pem_pubkey_path.exists():
             die(
                 f"Not overwriting extant PEM-formatted pubkey: {pem_pubkey_path}; "
                 "manual intervention required"
             )
 
-        generate_key(_ALGORITHM_MAP[args.type], label, key_id, args.pin)
+        generate_key(_ALGORITHM_MAP[args.type], label, key_id, user_pin)
         extract_pubkey(key_id, raw_pubkey_path)
         convert_pubkey(raw_pubkey_path, pem_pubkey_path)
 

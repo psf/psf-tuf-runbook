@@ -2,7 +2,6 @@ use clap::{App, Arg};
 use dialoguer::{Confirmation, PasswordInput};
 use lazy_static::lazy_static;
 use pkcs11::{types, Ctx};
-use rand::Rng;
 use regex::Regex;
 
 use std::path::Path;
@@ -31,17 +30,6 @@ const BIG_SCARY_BANNER: &'static str = r#"
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 "#;
 
-// The Nitrokey HSM uses a Smartcard-HSM internally; the latter
-// uses a 16-character hex string as its SO PIN.
-const SO_PIN_ALPHABET: &'static [u8] = b"0123456789abcdef";
-const SO_PIN_LENGTH: usize = 16;
-
-// There's conflicting information available online about the valid character
-// set and maximum length for a normal user PIN.
-// We use 6 characters chosen from the lowercase alphabet + numbers.
-const USER_PIN_ALPHABET: &'static [u8] = b"abcdefghijklmnopqrstuvwxyz0123456789";
-const USER_PIN_LENGTH: usize = 6;
-
 fn confirm(msg: &str) -> Result<(), String> {
     match Confirmation::new().with_text(msg).default(false).interact() {
         Ok(true) => Ok(()),
@@ -63,7 +51,22 @@ fn is_valid_so_pin(val: String) -> Result<(), String> {
     if SO_PIN_PATTERN.is_match(&val) {
         Ok(())
     } else {
-        Err(format!("invalid SO pin (expected 16 hex digits): {}", val))
+        Err(format!("invalid SO PIN (expected 16 hex digits): {}", val))
+    }
+}
+
+fn is_valid_user_pin(val: String) -> Result<(), String> {
+    lazy_static! {
+        static ref USER_PIN_PATTERN: Regex = Regex::new("^[a-z0-9]{6}$").unwrap();
+    }
+
+    if USER_PIN_PATTERN.is_match(&val) {
+        Ok(())
+    } else {
+        Err(format!(
+            "invalid user PIN (expected 6 alphanum characters): {}",
+            val
+        ))
     }
 }
 
@@ -154,28 +157,6 @@ fn token_in_deadly_state(token: &types::CK_TOKEN_INFO) -> bool {
         >= 1
 }
 
-fn new_so_pin() -> String {
-    let mut rng = rand::thread_rng();
-
-    (0..SO_PIN_LENGTH)
-        .map(|_| {
-            let idx = rng.gen_range(0, SO_PIN_ALPHABET.len());
-            SO_PIN_ALPHABET[idx] as char
-        })
-        .collect()
-}
-
-fn new_user_pin() -> String {
-    let mut rng = rand::thread_rng();
-
-    (0..USER_PIN_LENGTH)
-        .map(|_| {
-            let idx = rng.gen_range(0, USER_PIN_ALPHABET.len());
-            USER_PIN_ALPHABET[idx] as char
-        })
-        .collect()
-}
-
 fn perform_factory_reset(
     pkcs11_ctx: &Ctx,
     slot: types::CK_SLOT_ID,
@@ -226,31 +207,44 @@ fn perform_factory_reset(
         return Err(format!("failed to login as Security Officer: {}", e));
     }
 
-    // Generate our new, random SO PIN.
-    let new_so_pin = new_so_pin();
+    let new_so_pin = {
+        let new_so_pin = match PasswordInput::new()
+            .with_prompt("Enter your NEW Security Officer PIN")
+            .interact()
+        {
+            Ok(password) => password,
+            Err(e) => {
+                pkcs11_ctx
+                    .close_session(session)
+                    .unwrap_or_else(|e| eprintln!("Error while closing session: {}", e));
+                return Err(format!("prompt failed: {}", e));
+            }
+        };
 
-    println!("This is your NEW Security Officer PIN: {}", new_so_pin);
-    println!("You MUST write this SO PIN down before continuing.");
+        is_valid_so_pin(new_so_pin.clone())?;
 
-    let confirm_new_so_pin = match PasswordInput::new()
-        .with_prompt("Re-enter your NEW Security Officer PIN")
-        .interact()
-    {
-        Ok(password) => password,
-        Err(e) => {
+        let confirm_new_so_pin = match PasswordInput::new()
+            .with_prompt("Re-enter your NEW Security Officer PIN")
+            .interact()
+        {
+            Ok(password) => password,
+            Err(e) => {
+                pkcs11_ctx
+                    .close_session(session)
+                    .unwrap_or_else(|e| eprintln!("Error while closing session: {}", e));
+                return Err(format!("prompt failed: {}", e));
+            }
+        };
+
+        if new_so_pin != confirm_new_so_pin {
             pkcs11_ctx
                 .close_session(session)
                 .unwrap_or_else(|e| eprintln!("Error while closing session: {}", e));
-            return Err(format!("prompt failed: {}", e));
+            return Err(String::from("SO PIN does not match!"));
         }
-    };
 
-    if new_so_pin != confirm_new_so_pin {
-        pkcs11_ctx
-            .close_session(session)
-            .unwrap_or_else(|e| eprintln!("Error while closing session: {}", e));
-        return Err(String::from("SO PIN does not match!"));
-    }
+        new_so_pin
+    };
 
     // Set our new SO PIN.
     if let Err(e) = pkcs11_ctx.set_pin(session, Some(so_pin), Some(&new_so_pin)) {
@@ -275,31 +269,44 @@ fn perform_factory_reset(
         return Err(format!("Failed to cycle SO session (login): {}", e));
     }
 
-    // Generate our new, random user PIN.
-    let new_user_pin = new_user_pin();
+    let new_user_pin = {
+        let new_user_pin = match PasswordInput::new()
+            .with_prompt("Enter your NEW user PIN")
+            .interact()
+        {
+            Ok(password) => password,
+            Err(e) => {
+                pkcs11_ctx
+                    .close_session(session)
+                    .unwrap_or_else(|e| eprintln!("Error while closing session: {}", e));
+                return Err(format!("prompt failed: {}", e));
+            }
+        };
 
-    println!("This is your NEW user PIN: {}", new_user_pin);
-    println!("You MUST write this user PIN down before continuing.");
+        is_valid_user_pin(new_user_pin.clone())?;
 
-    let confirm_new_user_pin = match PasswordInput::new()
-        .with_prompt("Re-enter your NEW user PIN")
-        .interact()
-    {
-        Ok(password) => password,
-        Err(e) => {
+        let confirm_new_user_pin = match PasswordInput::new()
+            .with_prompt("Re-enter your NEW user PIN")
+            .interact()
+        {
+            Ok(password) => password,
+            Err(e) => {
+                pkcs11_ctx
+                    .close_session(session)
+                    .unwrap_or_else(|e| eprintln!("Error while closing session: {}", e));
+                return Err(format!("prompt failed: {}", e));
+            }
+        };
+
+        if new_user_pin != confirm_new_user_pin {
             pkcs11_ctx
                 .close_session(session)
                 .unwrap_or_else(|e| eprintln!("Error while closing session: {}", e));
-            return Err(format!("prompt failed: {}", e));
+            return Err(String::from("User PIN does not match!"));
         }
-    };
 
-    if new_user_pin != confirm_new_user_pin {
-        pkcs11_ctx
-            .close_session(session)
-            .unwrap_or_else(|e| eprintln!("Error while closing session: {}", e));
-        return Err(String::from("User PIN does not match!"));
-    }
+        new_user_pin
+    };
 
     if let Err(e) = pkcs11_ctx.init_pin(session, Some(&new_user_pin)) {
         pkcs11_ctx
@@ -346,7 +353,10 @@ fn run() -> Result<(), String> {
     //  3. Creating the normal user account and PIN.
     perform_factory_reset(&pkcs11_ctx, slot, &so_pin)?;
 
-    println!("Use this serial number when doing key generation: {}", serial_number);
+    println!(
+        "Use this serial number when doing key generation: {}",
+        serial_number
+    );
 
     Ok(())
 }
