@@ -164,10 +164,9 @@ offline computer.
 
 1. **DO** hit `y` once ready to continue.
 
-1. **DO** enter your new authentication key password. This password should be long, random, and
-unique.
+1. **DO** enter the new authentication key password generated for this YubiHSM during the pre-ceremony.
 
-1. **DO** re-enter your authentication key password.
+1. **DO** re-enter the authentication key password.
 
 1. **DO** wait for the following output:
 
@@ -177,11 +176,9 @@ unique.
     We're creating our TUF keys and attestation certificates now.
     ```
 
-1. **DO** re-enter your authentication key password.
+1. **DO** re-enter the authentication key password.
 
 1. **DO** wait for the program to exit.
-
-1. **DO** write down your authentication key password on a *separate* piece of loose-leaf, and fold it.
 
 1. **DO** check for the following files in the runbook directory:
 
