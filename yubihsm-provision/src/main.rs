@@ -17,7 +17,7 @@ use yubihsm::ecdsa::curve;
 use yubihsm::object::{Id, Label, Type};
 use yubihsm::{Credentials, UsbConfig};
 
-use std::fs::File;
+use std::fs::{self, File};
 use std::io::Write;
 use std::ops::Add;
 use std::path::Path;
@@ -26,6 +26,11 @@ use std::{thread, time};
 
 const TUF_ROOT_KEY_ID: Id = 3;
 const TUF_TARGETS_KEY_ID: Id = 4;
+
+// The parent directory that all ceremony products go into.
+// This program will write its outputs to {CEREMONY_PRODUCTS_DIR}/XXXXXXXXXX/,
+// where XXXXXXXXXX is the 0-passed serial number of the HSM.
+const CEREMONY_PRODUCTS_DIR: &'static str = "ceremony-products";
 
 // The suffix for the file that we'll write the YubiHSM's internal attestation
 // certificate to. The ultimate path will be of the form XXXXXXXXXX_cert.der,
@@ -123,15 +128,17 @@ fn find_hsm() -> Result<UsbConfig, String> {
 }
 
 fn file_presence_checks(serial_number: &str) -> Result<(), String> {
+    let output_dir = Path::new(CEREMONY_PRODUCTS_DIR).join(serial_number);
+
     for suffix in vec![
         TUF_ROOT_KEY_ATTESTATION_FILE_SUFFIX,
         TUF_TARGETS_KEY_ATTESTATION_FILE_SUFFIX,
     ] {
-        let file = format!("{}_{}", serial_number, suffix);
-        if Path::new(&file).exists() {
+        let filename = output_dir.join(format!("{}_{}", serial_number, suffix));
+        if filename.exists() {
             return Err(format!(
-                "Attestation file already exists: {}; aborting",
-                file
+                "Attestation file already exists: {:?}; aborting",
+                filename
             ));
         }
     }
@@ -364,11 +371,17 @@ fn run() -> Result<(), String> {
     // Step 0: Find the attached YubiHSM and return a suitable USB config
     // for connecting to it. We use this config through the other steps,
     // to avoid rediscovery.
+    // Also, create the output directory.
     let usb_config = find_hsm()?;
     let serial_number = match usb_config.serial {
         Some(serial) => serial.to_string(),
         None => return Err(String::from("no serial number for USB config?")),
     };
+
+    let output_dir = Path::new(CEREMONY_PRODUCTS_DIR).join(&serial_number);
+    if let Err(e) = fs::create_dir_all(&output_dir) {
+        return Err(format!("Couldn't create output directory: {}", e));
+    }
 
     file_presence_checks(&serial_number)?;
 
@@ -433,18 +446,10 @@ fn run() -> Result<(), String> {
                 &client,
             )?,
         ),
-        // NOTE: This panic is impossible due to the flag restrictions
+        // NOTE: This is impossible due to the flag restrictions
         // in possible_values.
-        _ => panic!("impossible match"),
+        _ => unreachable!("impossible match"),
     };
-
-    // let (root_pubkey, root_attestation) =
-    //     new_ecc_keypair_with_attestation::<curve::NistP384>("tuf-root", TUF_ROOT_KEY_ID, &client)?;
-    // let (targets_pubkey, targets_attestation) = new_ecc_keypair_with_attestation::<curve::NistP384>(
-    //     "tuf-targets",
-    //     TUF_TARGETS_KEY_ID,
-    //     &client,
-    // )?;
 
     // Write our public keys and attestation data to disk.
     for tup in vec![
@@ -460,8 +465,8 @@ fn run() -> Result<(), String> {
         ),
         (TUF_TARGETS_KEY_PUBKEY_FILE_SUFFIX, targets_pubkey),
     ] {
-        let path = format!("{}_{}", serial_number, tup.0);
-        let mut file = match File::create(Path::new(&path)) {
+        let filename = output_dir.join(format!("{}_{}", serial_number, tup.0));
+        let mut file = match File::create(&filename) {
             Ok(file) => file,
             Err(e) => {
                 return Err(format!(
