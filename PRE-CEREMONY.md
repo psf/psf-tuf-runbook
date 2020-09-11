@@ -139,11 +139,11 @@ place them, **folded**, into a tamper-evident bag. Seal the bag.
 
 On the preparation computer:
 
-* Download the prepared ceremony image, hosted [here](https://drive.google.com/file/d/1YJyOGuhXkOVXxXk4p70_s5u4plOBAAC8/view?usp=sharing).
+* Download the prepared ceremony image, hosted [here](https://drive.google.com/file/d/194UMgsxBa8KIizHerKDQ0F9VoQwVZx7G/view?usp=sharing).
 
 * Confirm the integrity of the ceremony image archive:
 
-    * SHA2-256: `24981cb828ffbdf804f4cf177a6179d64527570e9909299e269c3f9083d21fc6`
+    * SHA2-256: `8c55f475bbec6fd613c82e3873c07e11d47f4dfa29916132fa4a7948ce9a6fd2`
 
     ```bash
     $ shasum -a 256 runbook.img.zip
@@ -157,7 +157,7 @@ On the preparation computer:
 
 * Confirm the integrity of the ceremony image:
 
-    * SHA2-256: `0bba7b046ef50df390af646b564b571077b5ceef9c9b03bb41089d9ed6751c32`
+    * SHA2-256: `75bf37dbc1698786a19ff571df2530ed3cefd20f699f80f9b9963e0dccae6fa8`
 
     ```bash
     $ shasum -a 256 runbook.img
@@ -231,7 +231,7 @@ We will use `/dev/rdiskN` below for the "raw" device, for performance reasons.
 
 1. Confirm the hash of the `yubihsm-provision` binary against the following checksum:
 
-    * SHA2-256: `f47e247f0739cf919baaef4079a1a8023adeb6c95957cfc8f3ca094dd4c80edf`
+    * SHA2-256: `27db7eb5c86fec7a5df40fab84cb2e67961524c4a5eec6e3bdc5dac6e62904e9`
 
     ```bash
     $ shasum -a 256 $(which yubihsm-provision)
@@ -239,7 +239,7 @@ We will use `/dev/rdiskN` below for the "raw" device, for performance reasons.
 
 1. Confirm the hash of the `nitrohsm-provision` binary against the following checksum:
 
-    * SHA2-256: `9d89fd46fb4ce71a9eb21b743a0ad68112c80f26e51f959120bc92a6f1d3806f`
+    * SHA2-256: `9088da489aa6d1697593ea7a7968f546bee01ba4a555fbb39c643ee44ede6613`
 
     ```bash
     $ shasum -a 256 $(which nitrohsm-provision)
