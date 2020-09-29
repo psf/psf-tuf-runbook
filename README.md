@@ -81,6 +81,8 @@ during the pre-ceremony.
 
 ## Provisioning the YubiHSM 2
 
+*Time estimate: 10 minutes*.
+
 1. **DO** locate and write down the serial number printed on the YubiHSM 2. Refer to the picture below:
 
     ![A YubiHSM 2](./assets/yubihsm2.jpg)
@@ -223,6 +225,8 @@ offline computer.
 1. **DO** hold the sealed tamper-evident bag up to the camera of the communication computer.
 
 ## Provisioning the Nitrokey HSM
+
+*Time estimate: 10 minutes*.
 
 1. **DO** determine the current Security Officer PIN ("SO-PIN"):
 

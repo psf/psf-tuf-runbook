@@ -4,6 +4,8 @@ Pre-ceremony action items
 The following is a checklist of action items that **must** be completed
 before the key signing and generation ceremonies may be attempted.
 
+The entire pre-ceremony should take approximately *one hour* to complete.
+
 ## Inventory
 
 Confirm the presence of **each** of the following:
