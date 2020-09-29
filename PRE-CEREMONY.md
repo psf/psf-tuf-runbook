@@ -81,7 +81,7 @@ On the preparation computer:
 
 For each of the YubiHSMs:
 
-* Generate a 12-character password for the authentication key, using a 6-sided die and the following table:
+* Generate a 12-character authentication key password, using a 6-sided die and the following table:
 
     ```
                   First Roll
@@ -143,8 +143,8 @@ Fold the paper.
 
 #### Store the pre-generated passwords and PINs
 
-* Once all YubiHSM passwords and Nitrokey HSM PINs have been generated and written down,
-place them, **folded**, into a tamper-evident bag. Seal the bag.
+* Once all YubiHSM authentication key passwords and Nitrokey HSM PINs have been generated and
+written down, place them, **folded**, into a tamper-evident bag. Seal the bag.
 
 ### Image and test the Raspberry Pi and peripherals
 
