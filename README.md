@@ -19,8 +19,6 @@ We use the following notation:
 thereon.
 * **END**: You've reached an end state.
 
-1. **DO GO TO** [Start](#start)
-
 ## Start
 
 1. **DO GO TO** [Prepare the environment](#prepare-the-environment).
