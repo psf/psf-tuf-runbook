@@ -10,8 +10,11 @@ Confirm the presence of **each** of the following:
 
 * **Exactly one (1)** preparation computer
   * The preparation steps below assume that the computer is running macOS
+  * This *MAY NOT* be the same as the ceremony computer, which is listed
+    separately below
 * **Exactly one (1)** communication computer
-  * This *MAY* be the same as the preparation computer
+  * This *MAY* be the same as the preparation computer, but *MAY NOT* be the
+    same as the ceremony computer
 * **Exactly one (1)** digital camera
   * This *MAY* be a smartphone in airplane mode.
 * **Exactly one (1)** external monitor, HDMI compatible
@@ -19,7 +22,7 @@ Confirm the presence of **each** of the following:
 * **Exactly one (1)** USB keyboard
 * **Exactly one (1)** microUSB to USB-A cable
 * **Exactly one (1)** wall socket to USB-A power source, minimum 5V/1A
-* **Exactly one (1)** Raspberry Pi, Model 3
+* **Exactly one (1)** Raspberry Pi, Model 3 as the ceremony computer
 * **Exactly one (1)** microSD flash storage card, minimum 32GB
 * **At least one (1)** microSD reader with USB interface
 * **Exactly six (6)** HSMs:
