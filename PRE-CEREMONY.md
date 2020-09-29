@@ -150,7 +150,7 @@ written down, place them, **folded**, into a tamper-evident bag. Seal the bag.
 
 On the preparation computer:
 
-* Download the prepared ceremony image, hosted [here](https://drive.google.com/file/d/194UMgsxBa8KIizHerKDQ0F9VoQwVZx7G/view?usp=sharing).
+* Download the prepared ceremony image, hosted [here](https://github.com/trailofbits/psf-tuf-runbook/releases/download/runbook-9-11-20-v1/runbook.img.zip).
 
 * Confirm the integrity of the ceremony image archive:
 
