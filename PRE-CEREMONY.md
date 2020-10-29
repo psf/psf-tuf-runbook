@@ -175,7 +175,7 @@ On the preparation computer:
     ```
 
 * Insert the microSD card into the microSD reader, and insert the microSD reader into the
-desktop.
+preparation computer.
 
 * Identify the block device associated with the microSD card.
 
@@ -210,7 +210,7 @@ We will use `/dev/rdiskN` below for the "raw" device, for performance reasons.
 
 * Insert the microSD card into the Raspberry Pi.
 
-* Connect the Raspberry Pi to all peripherals **except** power and the flask stick.
+* Connect the Raspberry Pi to all peripherals **except** power and the flash stick.
 
 * Connect the Raspberry Pi to power, and confirm boot on the monitor.
 
