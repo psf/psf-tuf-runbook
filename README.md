@@ -3,6 +3,8 @@ psf-tuf-runbook
 
 This repository contains a runbook and supporting program for the Python Software Foundation's
 TUF key generation and signing ceremonies.
+The procedures documented here are designed to implement the security policies for offline keys defined in
+[PEP 458 - Secure PyPI downloads with signed repository metadata](https://www.python.org/dev/peps/pep-0458/)
 
 **Due to COVID-19, this document has been modified for a two person, remote ceremony.**
 
