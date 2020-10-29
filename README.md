@@ -3,6 +3,8 @@ psf-tuf-runbook
 
 This repository contains a runbook and supporting program for the Python Software Foundation's
 TUF key generation and signing ceremonies.
+The procedures documented here are designed to implement the security policies for offline keys defined in
+[PEP 458 - Secure PyPI downloads with signed repository metadata](https://www.python.org/dev/peps/pep-0458/)
 
 **Due to COVID-19, this document has been modified for a two person, remote ceremony.**
 
@@ -27,9 +29,11 @@ thereon.
 
 1. **DO** perform the [pre-ceremony](PRE-CEREMONY.md).
 
+1. **DO** Start streaming the ceremony using the communication computer.
+
 1. **IF** you have a phone or other personal devices, **THEN** set them on airplane mode.
 
-1. **DO** boot the trusted offline machine, and log into it using the credentials provided
+1. **DO** boot the trusted offline machine (the Raspberry Pi "ceremony computer"), and log into it using the credentials provided
 during the pre-ceremony.
 
 1. **DO** mount the flash storage stick:
@@ -47,22 +51,22 @@ during the pre-ceremony.
 1. **DO** take pictures of each HSM, in their tamper-evident bags.
 
 1. **DO** remove `YubiHSM2-1` from its tamper-evident bag and **GO TO**
-[Provisioning the Provisioning the YubiHSM 2](#provisioning-the-yubihsm-2)
+[Provisioning the YubiHSM 2](#provisioning-the-yubihsm-2)
 
 1. **DO** remove `YubiHSM2-2` from its tamper-evident bag and **GO TO**
-[Provisioning the Provisioning the YubiHSM 2](#provisioning-the-yubihsm-2)
+[Provisioning the YubiHSM 2](#provisioning-the-yubihsm-2)
 
 1. **DO** remove `YubiHSM2-3` from its tamper-evident bag and **GO TO**
-[Provisioning the Provisioning the YubiHSM 2](#provisioning-the-yubihsm-2)
+[Provisioning the YubiHSM 2](#provisioning-the-yubihsm-2)
 
 1. **DO** remove `Nitrokey HSM-4` from its tamper-evident bag and **GO TO**
-[Provisioning the Provisioning the Nitrokey HSM](#provisioning-the-nitrokey-hsm)
+[Provisioning the Nitrokey HSM](#provisioning-the-nitrokey-hsm)
 
 1. **DO** remove `Nitrokey HSM-5` from its tamper-evident bag and **GO TO**
-[Provisioning the Provisioning the Nitrokey HSM](#provisioning-the-nitrokey-hsm)
+[Provisioning the Nitrokey HSM](#provisioning-the-nitrokey-hsm)
 
 1. **DO** remove `Nitrokey HSM-6` from its tamper-evident bag and **GO TO**
-[Provisioning the Provisioning the Nitrokey HSM](#provisioning-the-nitrokey-hsm)
+[Provisioning the Nitrokey HSM](#provisioning-the-nitrokey-hsm)
 
 1. **DO** copy the ceremony products to the flash storage stick:
 
