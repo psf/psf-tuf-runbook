@@ -50,22 +50,22 @@ during the pre-ceremony.
 
 1. **DO** take pictures of each HSM, in their tamper-evident bags.
 
-1. **DO** remove `YubiHSM2-1` from its tamper-evident bag and **GO TO**
+1. **DO** remove `YubiHSM2-1` (keytype: P-256) from its tamper-evident bag and **GO TO**
 [Provisioning the YubiHSM 2](#provisioning-the-yubihsm-2)
 
-1. **DO** remove `YubiHSM2-2` from its tamper-evident bag and **GO TO**
+1. **DO** remove `YubiHSM2-2` (keytype: P-384) from its tamper-evident bag and **GO TO**
 [Provisioning the YubiHSM 2](#provisioning-the-yubihsm-2)
 
-1. **DO** remove `YubiHSM2-3` from its tamper-evident bag and **GO TO**
+1. **DO** remove `YubiHSM2-3` (keytype: P-256) from its tamper-evident bag and **GO TO**
 [Provisioning the YubiHSM 2](#provisioning-the-yubihsm-2)
 
-1. **DO** remove `Nitrokey HSM-4` from its tamper-evident bag and **GO TO**
+1. **DO** remove `Nitrokey HSM-4` (keytype: P-384) from its tamper-evident bag and **GO TO**
 [Provisioning the Nitrokey HSM](#provisioning-the-nitrokey-hsm)
 
-1. **DO** remove `Nitrokey HSM-5` from its tamper-evident bag and **GO TO**
+1. **DO** remove `Nitrokey HSM-5` (keytype: P-256) from its tamper-evident bag and **GO TO**
 [Provisioning the Nitrokey HSM](#provisioning-the-nitrokey-hsm)
 
-1. **DO** remove `Nitrokey HSM-6` from its tamper-evident bag and **GO TO**
+1. **DO** remove `Nitrokey HSM-6` (keytype: P-384) from its tamper-evident bag and **GO TO**
 [Provisioning the Nitrokey HSM](#provisioning-the-nitrokey-hsm)
 
 1. **DO** copy the ceremony products to the flash storage stick:
