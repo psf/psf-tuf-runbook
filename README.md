@@ -390,6 +390,24 @@ offline computer.
 
 1. **DO** copy all images taken of the HSMs and tamper-evident bags into the `images` subdirectory.
 
+1. **DO** commit the results, signing with a publicly announced PGP key:
+
+    ```bash
+    git add ceremony/YYYY-MM-DD
+    git commit -S
+    ```
+
+    Where `YYYY-MM-DD` is the current date.
+
+1. **DO** push the branch to [psf/psf-tuf-runbook](https://github.com/psf/psf-tuf-runbook) and open
+a PR for review.
+
+    ```bash
+    git push origin ceremony-YYYY-MM-DD
+    ```
+
+    Where `YYYY-MM-DD` is the current date.
+
 1. **DO** securely destroy the SD card used for the runbook image **OR** zero it:
 
     ```bash
