@@ -81,6 +81,8 @@ during the pre-ceremony.
     $ sudo umount /media/ceremony-products
     ```
 
+1. **DO** perform the [post-ceremony steps](#post-ceremony).
+
 1. **END**
 
 ## Provisioning the YubiHSM 2
@@ -360,3 +362,37 @@ offline computer.
 1. **DO** seal the provisioned HSM and folded Security Officer and user PINs in the tamper-evident bag.
 
 1. **DO** hold the sealed tamper-evident bag up to the camera of the communication computer.
+
+## Post-ceremony
+
+1. **DO** insert the flash stick into the communication computer.
+
+1. **DO** navigate to the runbook repository in a new terminal.
+
+1. **DO** create a new branch:
+
+    ```bash
+    git checkout -b ceremony-YYYY-MM-DD
+    ```
+
+    Where `YYYY-MM-DD` is the current date.
+
+1. **DO** create the following new subdirectories:
+
+    ```bash
+    mkdir -p ceremony/YYYY-MM-DD/ceremony-products
+    mkdir -p ceremony/YYYY-MM-DD/images
+    ```
+
+    Where `YYYY-MM-DD` is the current date.
+
+1. **DO** copy the contents of the ceremony flash stick into the `ceremony-products` subdirectory.
+
+1. **DO** copy all images taken of the HSMs and tamper-evident bags into the `images` subdirectory.
+
+1. **DO** securely destroy the SD card used for the runbook image **OR** zero it:
+
+    ```bash
+    $ diskutil unmountDisk /dev/rdiskN
+    $ sudo dd bs=4m if=/dev/zero of=/dev/rdiskN
+    ```
