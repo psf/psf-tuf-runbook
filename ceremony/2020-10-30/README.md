@@ -16,3 +16,5 @@ paraphenelia from the ceremony.
 External assets:
 
 * [YouTube](https://youtu.be/jjAq7S49eow): A live recording of the ceremony.
+* [Internet Archive](https://archive.org/details/psf-tuf-2020-10-30-key-generation-and-signing-ceremony): An archival copy of the above.
+* [Gist](https://gist.github.com/sethmlarson/4d88566d662d3fa9697a6b3ea2cf0de9): A third-party attestation of the ceremony by an independent observer.
