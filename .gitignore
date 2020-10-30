@@ -1,6 +1,6 @@
 # attestation files
-*.der
-*.pem
+/*.der
+/*.pem
 
 # macOS cruft
 .DS_Store
@@ -11,4 +11,4 @@ bin/yubihsm-provision
 bin/nitrohsm-provision
 
 # ceremony products
-ceremony-products/
+/ceremony-products
