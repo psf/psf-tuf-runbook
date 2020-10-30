@@ -16,3 +16,8 @@ paraphenelia from the ceremony.
 External assets:
 
 * [YouTube](https://youtu.be/jjAq7S49eow): A live recording of the ceremony.
+
+Third-party assets:
+
+* [Notes](https://gist.github.com/sethmlarson/4d88566d662d3fa9697a6b3ea2cf0de9): 
+  Notes with timestamps taken during broadcast by Seth Larson (@sethmlarson)
