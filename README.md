@@ -214,6 +214,13 @@ offline computer.
     $ raw-ec-points-to-pem --type KEY-TYPE XXXXXXXXXX_targets_pubkey.pub
     ```
 
+1. **DO** confirm that the following files have been generated:
+
+    ```
+    ceremony-products/XXXXXXXXXX/XXXXXXXXXX_root_pubkey.pem
+    ceremony-products/XXXXXXXXXX/XXXXXXXXXX_targets_pubkey.pem
+    ```
+
 1. **DO** change directories back to the runbook directory.
 
     ```bash
@@ -222,9 +229,9 @@ offline computer.
 
 1. **DO** remove the HSM.
 
-1. **DO** seal the provisioned HSM and folded authentication key password in a tamper-evident bag.
+1. **DO** label a tamper-evident bag with the HSM's signing body ID and 0-prefixed serial number.
 
-1. **DO** label the bag with the HSM's signing body ID and 0-prefixed serial number.
+1. **DO** seal the provisioned HSM and folded authentication key password in the tamper-evident bag.
 
 1. **DO** hold the sealed tamper-evident bag up to the camera of the communication computer.
 
@@ -348,8 +355,8 @@ offline computer.
 
 1. **DO** remove the HSM.
 
-1. **DO** seal the provisioned HSM and folded Security Officer and user PINs in a tamper-evident bag.
+1. **DO** label a tamper-evident bag with the HSM's signing body ID and serial number.
 
-1. **DO** label the bag with the HSM's signing body ID and serial number.
+1. **DO** seal the provisioned HSM and folded Security Officer and user PINs in the tamper-evident bag.
 
 1. **DO** hold the sealed tamper-evident bag up to the camera of the communication computer.
