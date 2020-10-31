@@ -50,22 +50,22 @@ during the pre-ceremony.
 
 1. **DO** take pictures of each HSM, in their tamper-evident bags.
 
-1. **DO** remove `YubiHSM2-1` from its tamper-evident bag and **GO TO**
+1. **DO** remove `YubiHSM2-1` (keytype: P-256) from its tamper-evident bag and **GO TO**
 [Provisioning the YubiHSM 2](#provisioning-the-yubihsm-2)
 
-1. **DO** remove `YubiHSM2-2` from its tamper-evident bag and **GO TO**
+1. **DO** remove `YubiHSM2-2` (keytype: P-384) from its tamper-evident bag and **GO TO**
 [Provisioning the YubiHSM 2](#provisioning-the-yubihsm-2)
 
-1. **DO** remove `YubiHSM2-3` from its tamper-evident bag and **GO TO**
+1. **DO** remove `YubiHSM2-3` (keytype: P-256) from its tamper-evident bag and **GO TO**
 [Provisioning the YubiHSM 2](#provisioning-the-yubihsm-2)
 
-1. **DO** remove `Nitrokey HSM-4` from its tamper-evident bag and **GO TO**
+1. **DO** remove `Nitrokey HSM-4` (keytype: P-384) from its tamper-evident bag and **GO TO**
 [Provisioning the Nitrokey HSM](#provisioning-the-nitrokey-hsm)
 
-1. **DO** remove `Nitrokey HSM-5` from its tamper-evident bag and **GO TO**
+1. **DO** remove `Nitrokey HSM-5` (keytype: P-256) from its tamper-evident bag and **GO TO**
 [Provisioning the Nitrokey HSM](#provisioning-the-nitrokey-hsm)
 
-1. **DO** remove `Nitrokey HSM-6` from its tamper-evident bag and **GO TO**
+1. **DO** remove `Nitrokey HSM-6` (keytype: P-384) from its tamper-evident bag and **GO TO**
 [Provisioning the Nitrokey HSM](#provisioning-the-nitrokey-hsm)
 
 1. **DO** copy the ceremony products to the flash storage stick:
@@ -80,6 +80,8 @@ during the pre-ceremony.
     $ sync
     $ sudo umount /media/ceremony-products
     ```
+
+1. **DO** perform the [post-ceremony steps](#post-ceremony).
 
 1. **END**
 
@@ -214,6 +216,13 @@ offline computer.
     $ raw-ec-points-to-pem --type KEY-TYPE XXXXXXXXXX_targets_pubkey.pub
     ```
 
+1. **DO** confirm that the following files have been generated:
+
+    ```
+    ceremony-products/XXXXXXXXXX/XXXXXXXXXX_root_pubkey.pem
+    ceremony-products/XXXXXXXXXX/XXXXXXXXXX_targets_pubkey.pem
+    ```
+
 1. **DO** change directories back to the runbook directory.
 
     ```bash
@@ -222,9 +231,9 @@ offline computer.
 
 1. **DO** remove the HSM.
 
-1. **DO** seal the provisioned HSM and folded authentication key password in a tamper-evident bag.
+1. **DO** label a tamper-evident bag with the HSM's signing body ID and 0-prefixed serial number.
 
-1. **DO** label the bag with the HSM's signing body ID and 0-prefixed serial number.
+1. **DO** seal the provisioned HSM and folded authentication key password in the tamper-evident bag.
 
 1. **DO** hold the sealed tamper-evident bag up to the camera of the communication computer.
 
@@ -348,8 +357,60 @@ offline computer.
 
 1. **DO** remove the HSM.
 
-1. **DO** seal the provisioned HSM and folded Security Officer and user PINs in a tamper-evident bag.
+1. **DO** label a tamper-evident bag with the HSM's signing body ID and serial number.
 
-1. **DO** label the bag with the HSM's signing body ID and serial number.
+1. **DO** seal the provisioned HSM and folded Security Officer and user PINs in the tamper-evident bag.
 
 1. **DO** hold the sealed tamper-evident bag up to the camera of the communication computer.
+
+## Post-ceremony
+
+1. **DO** insert the flash stick into the communication computer.
+
+1. **DO** navigate to the runbook repository in a new terminal.
+
+1. **DO** create a new branch:
+
+    ```bash
+    git checkout -b ceremony-YYYY-MM-DD
+    ```
+
+    Where `YYYY-MM-DD` is the current date.
+
+1. **DO** create the following new subdirectories:
+
+    ```bash
+    mkdir -p ceremony/YYYY-MM-DD/ceremony-products
+    mkdir -p ceremony/YYYY-MM-DD/images
+    ```
+
+    Where `YYYY-MM-DD` is the current date.
+
+1. **DO** copy the contents of the ceremony flash stick into the `ceremony-products` subdirectory.
+
+1. **DO** copy all images taken of the HSMs and tamper-evident bags into the `images` subdirectory.
+
+1. **DO** commit the results, signing with a publicly announced PGP key:
+
+    ```bash
+    git add ceremony/YYYY-MM-DD
+    git commit -S
+    ```
+
+    Where `YYYY-MM-DD` is the current date.
+
+1. **DO** push the branch to [psf/psf-tuf-runbook](https://github.com/psf/psf-tuf-runbook) and open
+a PR for review.
+
+    ```bash
+    git push origin ceremony-YYYY-MM-DD
+    ```
+
+    Where `YYYY-MM-DD` is the current date.
+
+1. **DO** securely destroy the SD card used for the runbook image **OR** zero it:
+
+    ```bash
+    $ diskutil unmountDisk /dev/rdiskN
+    $ sudo dd bs=4m if=/dev/zero of=/dev/rdiskN
+    ```
