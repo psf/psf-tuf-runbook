@@ -12,6 +12,8 @@ Repository assets:
 during the ceremony.
 * [images/](images/): Digital images of HSMs, tamper-evident packagaging, and other
 paraphenelia from the ceremony.
+* [handwriting-disambiguation.png](handwriting-disambiguation.png): Recored for disambiguation
+of handwriting for PINs included with each HSM.
 
 External assets:
 
