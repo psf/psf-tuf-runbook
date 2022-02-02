@@ -21,6 +21,9 @@ We use the following notation:
 thereon.
 * **END**: You've reached an end state.
 
+In addition, this document uses [RFC 2119](https://datatracker.ietf.org/doc/html/rfc2119)
+to describe optional and mandatory steps.
+
 ## Start
 
 1. **DO GO TO** [Prepare the environment](#prepare-the-environment).
@@ -407,6 +410,10 @@ a PR for review.
     ```
 
     Where `YYYY-MM-DD` is the current date.
+
+1. **DO** await for PR approval, and confirm that the branch is merged into the `main` branch.
+
+    * You **MAY** delete the original ceremony branch once merged.
 
 1. **DO** securely destroy the SD card used for the runbook image **OR** zero it:
 
